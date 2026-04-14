@@ -71,7 +71,7 @@ This ensures:
 ---
 
 ## Project Structure
-```mermaid
+```
 src/main/java/com/remittance
 │
 ├── config/        → Application configuration (security, CORS, etc.)
@@ -89,11 +89,11 @@ src/main/java/com/remittance
 ## How to Run the Application
 
 ### Step 1: Clone the Repo
-```mermaid
+```
 git clone https://github.com/kadelcode/quote-remittance-backend.git
 ```
 then:
-```mermaid
+```
 cd quote-remittance-backend
 ```
 
