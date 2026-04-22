@@ -121,7 +121,7 @@ We use a **Modular Monolith Architecture**.
   - Exchange rate (Provider)
   - Fees
   - Receive amount
-  - Expiry timestamp (Based exchange rate)
+  - Expiry timestamp (Based on exchange rate)
 
 ### 2. Accept Quote
 - System validates:
