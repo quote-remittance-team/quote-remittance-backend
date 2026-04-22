@@ -40,7 +40,7 @@ Define the main components of the system and how they interact
 ---
 
 ## High-Level Architecture Diagram
-![Architecture Diagram]('https://github.com/quote-remittance-team/quote-remittance-backend/tree/main/docs/diagrams/quote-remittance-architecture.drawio.png')
+![Architecture Diagram](./diagrams/quote-remittance-architecture.drawio.png)
 
 ## Architecture Style
 
