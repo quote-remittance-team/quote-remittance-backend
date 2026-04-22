@@ -64,7 +64,7 @@ We use a **Modular Monolith Architecture**.
 ---
 
 ### 2. Backend (Application Layer)
-- Built with Java 21 + Sprint Boot
+- Built with Java 21 + Spring Boot
 - Exposes REST APIs
 - Contains business logic
 
