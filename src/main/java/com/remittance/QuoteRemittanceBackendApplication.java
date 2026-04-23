@@ -6,8 +6,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
 
-// To activate the timestamps
-@EnableJpaAuditing
 public class QuoteRemittanceBackendApplication {
 
     public static void main(String[] args) {
