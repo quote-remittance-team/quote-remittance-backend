@@ -3,7 +3,6 @@ package com.remittance.quote.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
@@ -18,23 +17,22 @@ public class Quote {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY )
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Setter
     @Column(precision = 18, scale = 2)
     private BigDecimal sendAmount;
 
     @Enumerated(EnumType.STRING)
-    @Setter
+    @Column(nullable = false)
     private Currency fromCurrency;
 
     @Enumerated(EnumType.STRING)
-    @Setter
+    @Column(nullable = false)
     private Currency toCurrency;
 
-    @Column(precision = 18, scale = 6)
+    @Column( nullable = false, precision = 18, scale = 6)
     private BigDecimal exchangeRate;
 
     @Column(precision = 18, scale = 2)
@@ -47,13 +45,13 @@ public class Quote {
     private BigDecimal totalPayable;
 
     @Enumerated(EnumType.STRING)
-    @Setter
+    @Column(nullable = false)
     private Status status ;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @Setter
+    @Column(nullable = false)
     private LocalDateTime expiresAt;
 
 
