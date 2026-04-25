@@ -2,6 +2,6 @@ package com.remittance.enums;
 
 public enum PayoutStatus {
     PENDING,
-    SUCCESS,
+    COMPLETED,
     FAILED
 }
