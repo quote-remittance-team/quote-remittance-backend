@@ -31,7 +31,7 @@ public class Remittance extends BaseEntity {
     private Quote quote;
 
     @OneToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "deposit_id", nullable = false, unique = true)
+    @JoinColumn(name = "deposit_id", nullable = false)
     private Deposit deposit;
 
     @Column(nullable = false)
