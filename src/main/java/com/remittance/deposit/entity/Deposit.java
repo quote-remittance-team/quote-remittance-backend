@@ -38,7 +38,7 @@ public class Deposit extends BaseEntity {
     @Column(nullable = false)
     private DepositStatus status;
 
-    @Column(name = "payment_reference", updatable = false)
+    @Column(name = "payment_reference")
     private String paymentReference;
 
     @Column(name = "idempotency_key", nullable = false, updatable = false)
