@@ -50,8 +50,9 @@ public class Quote {
     private BigDecimal totalPayable;
 
     @Enumerated(EnumType.STRING)
+    @Setter
     @Column(nullable = false)
-    private Status status ;
+    private Status status;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
