@@ -25,6 +25,7 @@ public class Payout extends BaseEntity {
     @JoinColumn(name = "remittance_id", nullable = false)
     private Remittance remittance;
 
+    @Setter(AccessLevel.NONE)
     @Column(name = "provider_reference", nullable = false, updatable = false)
     private String providerReference;
 
