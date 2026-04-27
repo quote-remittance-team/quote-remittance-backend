@@ -41,6 +41,6 @@ public class Deposit extends BaseEntity {
     @Column(name = "payment_reference")
     private String paymentReference;
 
-    @Column(name = "idempotency_key", nullable = false, updatable = false)
+    @Column(name = "idempotency_key", unique = true, nullable = false)
     private String idempotencyKey;
 }
