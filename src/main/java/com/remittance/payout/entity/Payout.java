@@ -12,6 +12,9 @@ import java.util.UUID;
 @Getter
 @Entity
 @NoArgsConstructor
+@Getter
+@NoArgsConstructor
+@Entity
 public class Payout {
 
     @Id
