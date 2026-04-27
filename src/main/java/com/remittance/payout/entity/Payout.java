@@ -1,51 +1,35 @@
 package com.remittance.payout.entity;
 
+import com.remittance.common.model.BaseEntity;
+import com.remittance.enums.PayoutStatus;
+import com.remittance.remittance.entity.Remittance;
 import jakarta.persistence.*;
-import lombok.Getter;
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.*;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
-@Getter
 @Entity
-@NoArgsConstructor
+@Table(
+        name = "payouts",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_payout_provider_reference", columnNames = "provider_reference"),
+                @UniqueConstraint(name = "uk_payout_remittance", columnNames = "remittance_id")
+        }
+)
 @Getter
-@NoArgsConstructor
-@Entity
-public class Payout {
+@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
+public class Payout extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(nullable = false)
-    private UUID id;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "remittance_id", nullable = false, unique = true )
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "remittance_id", nullable = false)
     private Remittance remittance;
 
-    @Column(nullable = false, unique = true)
+    @Setter(AccessLevel.NONE)
+    @Column(name = "provider_reference", nullable = false, updatable = false)
     private String providerReference;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Status status;
-
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
-
-
-    public enum Status {
-        PENDING,
-        SUCCESS,
-        FAILED
-    }
-
+    private PayoutStatus status;
 }
