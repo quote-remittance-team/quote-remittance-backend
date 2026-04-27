@@ -28,10 +28,12 @@ public class Quote {
     private BigDecimal sendAmount;
 
     @Enumerated(EnumType.STRING)
+    @Setter
     @Column(nullable = false)
     private Currency fromCurrency;
 
     @Enumerated(EnumType.STRING)
+    @Setter
     @Column(nullable = false)
     private Currency toCurrency;
 
