@@ -15,9 +15,6 @@ import java.math.BigDecimal;
                 @UniqueConstraint(name = "uk_deposit_quote", columnNames = "quote_id"),
                 @UniqueConstraint(name = "uk_deposit_payment_reference", columnNames = "payment_reference"),
                 @UniqueConstraint(name = "uk_deposit_idempotency", columnNames = "idempotency_key")
-        },
-        indexes = {
-                @Index(name = "idx_deposit_quote", columnList = "quote_id")
         }
 )
 @Getter
