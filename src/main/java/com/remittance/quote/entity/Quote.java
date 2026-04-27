@@ -1,75 +1,60 @@
 package com.remittance.quote.entity;
 
+import com.remittance.common.model.BaseEntity;
+import com.remittance.enums.QuoteStatus;
+import com.remittance.user.entity.User;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
-@Getter
-@NoArgsConstructor
 @Entity
-public class Quote {
+@Table(
+        name = "quotes",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_quote_reference", columnNames = "quote_reference")
+        }
+)
+@Getter
+@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
+public class Quote extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
-    @Column(nullable = false, unique = true)
+    @Column(name = "quote_reference", nullable = false, updatable = false)
     private String quoteReference;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(precision = 18, scale = 2)
+    @Column(name = "send_amount", nullable = false, precision = 18, scale = 2)
     private BigDecimal sendAmount;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Currency fromCurrency;
+    @Column(name = "from_currency", nullable = false)
+    private String fromCurrency;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Currency toCurrency;
+    @Column(name = "to_currency", nullable = false)
+    private String toCurrency;
 
-    @Column(nullable = false, precision = 18, scale = 6)
+    @Column(name = "exchange_rate", nullable = false, precision = 18, scale = 6, updatable = false)
     private BigDecimal exchangeRate;
 
-    @Column(precision = 18, scale = 2)
+    @Column(name = "fee", nullable = false, precision = 18, scale = 2)
     private BigDecimal fee;
 
-    @Column(precision = 18, scale = 2)
+    @Column(name = "receive_amount", nullable = false, precision = 18, scale = 2)
     private BigDecimal receiveAmount;
 
-    @Column(precision = 18, scale = 2)
+    @Column(name = "total_payable", nullable = false, precision = 18, scale = 2)
     private BigDecimal totalPayable;
 
     @Enumerated(EnumType.STRING)
-    @Setter
     @Column(nullable = false)
-    private Status status;
+    private QuoteStatus status;
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @Column(nullable = false)
+    @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;
-
-    public enum Currency {
-        USD,
-        EUR,
-        GBP,
-        NGN
-    }
-
-    public enum Status {
-        ACTIVE,
-        USED,
-        EXPIRED
-    }
 }
