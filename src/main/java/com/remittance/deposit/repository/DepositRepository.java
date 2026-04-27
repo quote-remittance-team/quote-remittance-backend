@@ -1,4 +1,4 @@
-package com.remittance.remittance.deposit.repository;
+package com.remittance.deposit.repository;
 
 import com.remittance.deposit.entity.Deposit;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,3 +17,4 @@ public interface DepositRepository  extends JpaRepository<Deposit, UUID> {
     //find deposit using payment gateway's reference receipt
     Optional<Deposit> findByPaymentReference(String paymentReference);
 }
+
