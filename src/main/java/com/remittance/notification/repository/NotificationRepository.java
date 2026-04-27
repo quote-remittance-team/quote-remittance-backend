@@ -1,7 +1,7 @@
-package com.remittance.remittance.notification.repository;
+package com.remittance.notification.repository;
 
-import com.remittance.remittance.notification.entity.Notification;
-import com.remittance.remittance.notification.enums.NotificationStatus;
+import com.remittance.notification.entity.Notification;
+import com.remittance.notification.enums.NotificationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,7 +1,7 @@
-package com.remittance.remittance.notification.entity;
+package com.remittance.notification.entity;
 
 import com.remittance.common.model.BaseEntity;
-import com.remittance.remittance.notification.enums.NotificationStatus;
+import com.remittance.notification.enums.NotificationStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
