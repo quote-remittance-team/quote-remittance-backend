@@ -3,6 +3,7 @@ package com.remittance.quote.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
@@ -13,6 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Entity
 public class Quote {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -20,7 +22,7 @@ public class Quote {
     @Column(nullable = false, unique = true)
     private String quoteReference;
 
-    @ManyToOne(fetch = FetchType.LAZY )
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
@@ -35,7 +37,7 @@ public class Quote {
     @Column(nullable = false)
     private Currency toCurrency;
 
-    @Column( nullable = false, precision = 18, scale = 6)
+    @Column(nullable = false, precision = 18, scale = 6)
     private BigDecimal exchangeRate;
 
     @Column(precision = 18, scale = 2)
@@ -48,15 +50,15 @@ public class Quote {
     private BigDecimal totalPayable;
 
     @Enumerated(EnumType.STRING)
+    @Setter
     @Column(nullable = false)
-    private Status status ;
+    private Status status;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
     private LocalDateTime expiresAt;
-
 
     public enum Currency {
         USD,
@@ -65,7 +67,7 @@ public class Quote {
         NGN
     }
 
-    public enum Status{
+    public enum Status {
         ACTIVE,
         USED,
         EXPIRED
