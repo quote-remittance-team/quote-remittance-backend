@@ -1,37 +1,29 @@
 package com.remittance.deposit.entity;
 
 import com.remittance.common.model.BaseEntity;
-import com.remittance.enums.DepositStatus;
 import com.remittance.quote.entity.Quote;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
-@Entity
-@Table(
-        name = "deposits",
-        uniqueConstraints = {
-                @UniqueConstraint(name = "uk_deposit_quote", columnNames = "quote_id"),
-                @UniqueConstraint(name = "uk_deposit_payment_reference", columnNames = "payment_reference"),
-                @UniqueConstraint(name = "uk_deposit_idempotency", columnNames = "idempotency_key")
-        }
-)
+// Lombok annotations
 @Getter
 @Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
+@NoArgsConstructor
+@Entity
+@Table(name = "deposits")
 public class Deposit extends BaseEntity {
-
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "quote_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "quote_id", referencedColumnName = "id", nullable = false, unique = true)
     private Quote quote;
 
-    @Column(nullable = false, precision = 18, scale = 2)
+    @Column(nullable = false)
     private BigDecimal amount;
 
-    @Column(name = "currency", nullable = false, length = 3)
+    @Column(nullable = false, length = 3)
     private String currency;
 
     @Enumerated(EnumType.STRING)
@@ -41,6 +33,6 @@ public class Deposit extends BaseEntity {
     @Column(name = "payment_reference")
     private String paymentReference;
 
-    @Column(name = "idempotency_key", unique = true, nullable = false)
+    @Column(name = "idempotency_key",unique = true, nullable = false)
     private String idempotencyKey;
 }
