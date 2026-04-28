@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface QuoteRepository extends JpaRepository<Quote, UUID> {
 
-    List<Quote> findByUserId(UUID userId);
+    List<Quote> findByUser_Id(UUID userId);
 
     Optional<Quote> findByIdAndUserId(UUID id, UUID userId);
 }
