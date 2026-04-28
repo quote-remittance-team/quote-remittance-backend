@@ -12,7 +12,7 @@ public interface RemittanceRepository extends JpaRepository<Remittance, UUID> {
 
     Optional<Remittance> findByReference(String reference);
 
-    Optional<Remittance> findByDeposit_Id(UUID depositId);
+    Optional<Remittance> findByDepositId(UUID depositId);
 
     Page<Remittance> findBySender_Id(UUID senderId, Pageable pageable);
 
