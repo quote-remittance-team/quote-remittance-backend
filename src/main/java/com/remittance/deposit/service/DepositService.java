@@ -21,8 +21,8 @@ public class DepositService {
     public Deposit initiateDeposit(Quote quote, BigDecimal amount, String currency, String idempotencyKey) {
         Deposit deposit =  Deposit.builder()
                 .quote(quote)
-                .amount(amount)
-                .currency(currency)
+                .amount(quote.getTotalPayable())
+                .currency(quote.getFromCurrency())
                 .status(DepositStatus.PENDING)
                 .idempotencyKey(idempotencyKey)
                 .build();
