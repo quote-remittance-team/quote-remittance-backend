@@ -8,5 +8,5 @@ import java.util.UUID;
 
 public interface PayoutRepository extends JpaRepository<Payout, UUID> {
 
-    Optional<Payout> findByRemittance_Id(UUID remittanceId);
+    Optional<Payout> findByRemittanceId(UUID remittanceId);
 }
