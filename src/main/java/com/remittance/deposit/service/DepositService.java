@@ -18,7 +18,7 @@ public class DepositService {
     private final DepositRepository depositRepository;
 
     @Transactional
-    public Deposit initiateDeposit(Quote quote, BigDecimal amount, String currency, String idempotencyKey) {
+    public Deposit initiateDeposit(Quote quote,  String idempotencyKey) {
         Deposit deposit =  Deposit.builder()
                 .quote(quote)
                 .amount(quote.getTotalPayable())
