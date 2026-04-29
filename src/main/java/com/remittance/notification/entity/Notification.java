@@ -1,19 +1,20 @@
 package com.remittance.notification.entity;
 
 import com.remittance.common.model.BaseEntity;
-import com.remittance.notification.enums.NotificationStatus;
+import com.remittance.enums.NotificationStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.util.UUID;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor
 @Entity
 @Table(name = "notifications")

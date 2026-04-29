@@ -3,9 +3,7 @@ package com.remittance.deposit.entity;
 import com.remittance.common.model.BaseEntity;
 import com.remittance.quote.entity.Quote;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 
@@ -13,6 +11,8 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @NoArgsConstructor
+@Builder
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "deposits")
 public class Deposit extends BaseEntity {
