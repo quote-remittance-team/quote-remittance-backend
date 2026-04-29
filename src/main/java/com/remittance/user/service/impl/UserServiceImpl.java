@@ -5,6 +5,7 @@ import com.remittance.user.dto.UserResponse;
 import com.remittance.user.entity.User;
 import com.remittance.user.repository.UserRepository;
 import com.remittance.user.service.UserService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
+    @Transactional
     public UserResponse register(RegisterUserRequest request) {
 
         String normalizedEmail = request.getEmail()
