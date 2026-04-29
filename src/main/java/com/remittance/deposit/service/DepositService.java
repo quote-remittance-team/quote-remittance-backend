@@ -26,7 +26,7 @@ public class DepositService {
     @Transactional
     public Deposit initiateDeposit(DepositRequestDto request) {
         Quote quote = quoteRepository.findById(request.getQuoteId()).orElseThrow(() -> new IllegalArgumentException("Quote not found"));
-        Currency currency = quote.getFromCurrency();
+        String currency = quote.getFromCurrency();
         Deposit deposit =  Deposit.builder()
                 .quote(quote)
                 .amount(quote.getTotalPayable())
