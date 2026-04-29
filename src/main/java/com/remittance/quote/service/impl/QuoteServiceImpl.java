@@ -30,6 +30,9 @@ public class QuoteServiceImpl implements QuoteService {
     @Value("${quote.expiry-minutes}")
     private long quoteExpiryMinutes;
 
+    @Value("${quote.fee-percentage}")
+    private BigDecimal feePercentage;
+
     @Override
     @Transactional
     public QuoteResponse generateQuote(CreateQuoteRequest request) {
@@ -117,7 +120,7 @@ public class QuoteServiceImpl implements QuoteService {
 
     private BigDecimal calculateFee(BigDecimal amount) {
 
-        return amount.multiply(BigDecimal.valueOf(0.015))
+        return amount.multiply(feePercentage)
                 .setScale(2, RoundingMode.HALF_UP);
     }
 
