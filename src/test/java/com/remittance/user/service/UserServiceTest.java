@@ -31,10 +31,10 @@ public class UserServiceTest {
     @Test
     void shouldRegisterUserSuccessfully() {
 
-        RegisterUserRequest request = RegisterUserRequest.builder()
-                .email("Test@Example.com")
-                .password("password123")
-                .build();
+        RegisterUserRequest request = new RegisterUserRequest(
+                "Test@Example.com",
+                "password123"
+        );
 
         when(userRepository.existsByEmailIgnoreCase("test@example.com"))
                 .thenReturn(false);
@@ -67,10 +67,10 @@ public class UserServiceTest {
     @Test
     void shouldThrowExceptionWhenEmailAlreadyExists() {
 
-        RegisterUserRequest request = RegisterUserRequest.builder()
-                .email("test@example.com")
-                .password("password123")
-                .build();
+        RegisterUserRequest request = new RegisterUserRequest(
+                "Test@Example.com",
+                "password123"
+        );
 
         when(userRepository.existsByEmailIgnoreCase("test@example.com")).thenReturn(true);
 

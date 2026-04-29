@@ -7,6 +7,7 @@ import com.remittance.user.repository.UserRepository;
 import com.remittance.user.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,17 +30,23 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Email already exists");
         }
 
-        User user = User.builder()
-                .email(normalizedEmail)
-                .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .build();
+        try {
 
-        User savedUser = userRepository.save(user);
+            User user = User.builder()
+                    .email(normalizedEmail)
+                    .passwordHash(passwordEncoder.encode(request.getPassword()))
+                    .build();
 
-        return UserResponse.builder()
-                .id(savedUser.getId())
-                .email(savedUser.getEmail())
-                .build();
+            User savedUser = userRepository.save(user);
+
+            return UserResponse.builder()
+                    .id(savedUser.getId())
+                    .email(savedUser.getEmail())
+                    .build();
+        } catch (DataIntegrityViolationException ex) {
+
+            throw new IllegalArgumentException("Email already exists");
+        }
     }
 
 }
