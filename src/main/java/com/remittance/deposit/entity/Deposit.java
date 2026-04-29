@@ -24,9 +24,8 @@ public class Deposit extends BaseEntity {
     @Column(nullable = false)
     private BigDecimal amount;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Currency currency;
+    @Column(nullable = false, length = 3)
+    private String currency;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
