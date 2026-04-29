@@ -4,6 +4,7 @@ import com.remittance.deposit.dto.DepositRequestDto;
 import com.remittance.deposit.entity.Deposit;
 import com.remittance.deposit.repository.DepositRepository;
 import com.remittance.deposit.entity.DepositStatus;
+import com.remittance.enums.Currency;
 import com.remittance.quote.entity.Quote;
 import com.remittance.quote.repository.QuoteRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,10 +26,11 @@ public class DepositService {
     @Transactional
     public Deposit initiateDeposit(DepositRequestDto request) {
         Quote quote = quoteRepository.findById(request.getQuoteId()).orElseThrow(() -> new IllegalArgumentException("Quote not found"));
+        Currency currency = quote.getFromCurrency();
         Deposit deposit =  Deposit.builder()
                 .quote(quote)
                 .amount(quote.getTotalPayable())
-                .currency(quote.getFromCurrency())
+                .currency(currency)
                 .status(DepositStatus.PENDING)
                 .idempotencyKey(request.getIdempotencyKey())
                 .build();

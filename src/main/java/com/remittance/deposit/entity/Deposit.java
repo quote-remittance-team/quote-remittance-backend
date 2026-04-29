@@ -1,6 +1,7 @@
 package com.remittance.deposit.entity;
 
 import com.remittance.common.model.BaseEntity;
+import com.remittance.enums.Currency;
 import com.remittance.quote.entity.Quote;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,8 +24,9 @@ public class Deposit extends BaseEntity {
     @Column(nullable = false)
     private BigDecimal amount;
 
-    @Column(nullable = false, length = 3)
-    private String currency;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Currency currency;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

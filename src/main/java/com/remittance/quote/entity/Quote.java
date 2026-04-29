@@ -1,6 +1,7 @@
 package com.remittance.quote.entity;
 
 import com.remittance.common.model.BaseEntity;
+import com.remittance.enums.Currency;
 import com.remittance.enums.QuoteStatus;
 import com.remittance.user.entity.User;
 import jakarta.persistence.*;
@@ -33,11 +34,13 @@ public class Quote extends BaseEntity {
     @Column(name = "send_amount", nullable = false, precision = 18, scale = 2)
     private BigDecimal sendAmount;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "from_currency", nullable = false)
-    private String fromCurrency;
+    private Currency fromCurrency;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "to_currency", nullable = false)
-    private String toCurrency;
+    private Currency toCurrency;
 
     @Column(name = "exchange_rate", nullable = false, precision = 18, scale = 6, updatable = false)
     private BigDecimal exchangeRate;

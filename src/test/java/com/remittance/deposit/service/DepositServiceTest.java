@@ -4,6 +4,7 @@ import com.remittance.deposit.dto.DepositRequestDto;
 import com.remittance.deposit.entity.Deposit;
 import com.remittance.deposit.repository.DepositRepository;
 import com.remittance.deposit.entity.DepositStatus;
+import com.remittance.enums.Currency;
 import com.remittance.quote.entity.Quote;
 import com.remittance.quote.repository.QuoteRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,13 +43,13 @@ class DepositServiceTest {
     void setUp() {
         mockQuote = Quote.builder()
                     .totalPayable(new BigDecimal("100.00"))
-                    .fromCurrency("USD")
+                    .fromCurrency(Currency.USD)
                     .build();
 
         mockDeposit = Deposit.builder()
                 .quote(mockQuote)
                 .amount(new BigDecimal("100.00"))
-                .currency("USD")
+                .currency(Currency.USD)
                 .status(DepositStatus.PENDING)
                 .idempotencyKey(IDEMPOTENCY_KEY)
                 .build();
