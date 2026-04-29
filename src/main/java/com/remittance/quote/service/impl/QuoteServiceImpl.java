@@ -1,6 +1,6 @@
 package com.remittance.quote.service.impl;
 
-import com.remittance.enums.Currency;
+import com.remittance.common.util.CurrencyValidator;
 import com.remittance.enums.QuoteStatus;
 import com.remittance.quote.dto.CreateQuoteRequest;
 import com.remittance.quote.dto.QuoteResponse;
@@ -11,11 +11,13 @@ import com.remittance.user.entity.User;
 import com.remittance.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.UUID;
 
 @Service
@@ -25,15 +27,18 @@ public class QuoteServiceImpl implements QuoteService {
     private final QuoteRepository quoteRepository;
     private final UserRepository userRepository;
 
+    @Value("${quote.expiry-minutes}")
+    private long quoteExpiryMinutes;
+
     @Override
     @Transactional
     public QuoteResponse generateQuote(CreateQuoteRequest request) {
 
-        validateCurrency(request.getFromCurrency());
-        validateCurrency(request.getToCurrency());
+        String fromCurrency = CurrencyValidator.normalize(request.getFromCurrency());
 
-        if (request.getFromCurrency()
-                .equalsIgnoreCase(request.getToCurrency())) {
+        String toCurrency = CurrencyValidator.normalize(request.getToCurrency());
+
+        if (fromCurrency.equalsIgnoreCase(toCurrency)) {
 
             throw new IllegalArgumentException(
                     "Source and destination currencies cannot be the same"
@@ -60,14 +65,14 @@ public class QuoteServiceImpl implements QuoteService {
                 .quoteReference(generateQuoteReference())
                 .user(user)
                 .sendAmount(request.getSendAmount())
-                .fromCurrency(Currency.valueOf(request.getFromCurrency().toUpperCase()))
-                .toCurrency(Currency.valueOf(request.getToCurrency().toUpperCase()))
+                .fromCurrency(fromCurrency)
+                .toCurrency(toCurrency)
                 .exchangeRate(exchangeRate)
                 .fee(fee)
                 .receiveAmount(receiveAmount)
                 .totalPayable(totalPayable)
                 .status(QuoteStatus.ACTIVE)
-                .expiresAt(LocalDateTime.now().plusMinutes(15))
+                .expiresAt(Instant.now().plus(Duration.ofMinutes(quoteExpiryMinutes)))
                 .build();
 
         Quote savedQuote = quoteRepository.save(quote);
@@ -76,8 +81,8 @@ public class QuoteServiceImpl implements QuoteService {
                 .quoteId(savedQuote.getId())
                 .quoteReference(savedQuote.getQuoteReference())
                 .sendAmount(savedQuote.getSendAmount())
-                .fromCurrency(savedQuote.getFromCurrency().name())
-                .toCurrency(savedQuote.getToCurrency().name())
+                .fromCurrency(savedQuote.getFromCurrency())
+                .toCurrency(savedQuote.getToCurrency())
                 .exchangeRate(savedQuote.getExchangeRate())
                 .fee(savedQuote.getFee())
                 .receiveAmount(savedQuote.getReceiveAmount())
@@ -85,15 +90,6 @@ public class QuoteServiceImpl implements QuoteService {
                 .expiresAt(savedQuote.getExpiresAt())
                 .build();
 
-    }
-
-    private void validateCurrency(String currency) {
-
-        try {
-            Currency.valueOf(currency.toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            throw new IllegalArgumentException("Unsupported currency");
-        }
     }
 
     /**

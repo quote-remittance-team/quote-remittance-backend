@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
@@ -29,5 +29,5 @@ public class QuoteResponse {
 
     private BigDecimal totalPayable;
 
-    private LocalDateTime expiresAt;
+    private Instant expiresAt;
 }

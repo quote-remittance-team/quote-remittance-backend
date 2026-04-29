@@ -74,9 +74,14 @@ class QuoteServiceTest {
                 "NGN"
         );
 
-        assertThrows(
+        IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
                 () -> quoteService.generateQuote(request)
+        );
+
+        assertEquals(
+                "Unsupported currency",
+                exception.getMessage()
         );
     }
 }

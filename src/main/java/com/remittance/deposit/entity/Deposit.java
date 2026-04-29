@@ -1,7 +1,6 @@
 package com.remittance.deposit.entity;
 
 import com.remittance.common.model.BaseEntity;
-import com.remittance.enums.Currency;
 import com.remittance.quote.entity.Quote;
 import jakarta.persistence.*;
 import lombok.*;

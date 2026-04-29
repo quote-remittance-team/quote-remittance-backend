@@ -1,14 +1,13 @@
 package com.remittance.quote.entity;
 
 import com.remittance.common.model.BaseEntity;
-import com.remittance.enums.Currency;
 import com.remittance.enums.QuoteStatus;
 import com.remittance.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(
@@ -34,13 +33,11 @@ public class Quote extends BaseEntity {
     @Column(name = "send_amount", nullable = false, precision = 18, scale = 2)
     private BigDecimal sendAmount;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "from_currency", nullable = false)
-    private Currency fromCurrency;
+    @Column(name = "from_currency", nullable = false, length = 3)
+    private String fromCurrency;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "to_currency", nullable = false)
-    private Currency toCurrency;
+    private String toCurrency;
 
     @Column(name = "exchange_rate", nullable = false, precision = 18, scale = 6, updatable = false)
     private BigDecimal exchangeRate;
@@ -59,5 +56,5 @@ public class Quote extends BaseEntity {
     private QuoteStatus status;
 
     @Column(name = "expires_at", nullable = false)
-    private LocalDateTime expiresAt;
+    private Instant expiresAt;
 }
