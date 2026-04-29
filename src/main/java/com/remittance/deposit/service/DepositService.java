@@ -6,7 +6,6 @@ import com.remittance.deposit.repository.DepositRepository;
 import com.remittance.deposit.entity.DepositStatus;
 import com.remittance.quote.entity.Quote;
 import com.remittance.quote.repository.QuoteRepository;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

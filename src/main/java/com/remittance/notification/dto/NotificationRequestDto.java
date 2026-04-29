@@ -1,6 +1,5 @@
 package com.remittance.notification.dto;
 
-import com.remittance.enums.NotificationStatus;
 import lombok.Data;
 import java.util.UUID;
 @Data

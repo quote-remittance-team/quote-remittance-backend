@@ -56,15 +56,15 @@ class NotificationServiceTest {
         requestDto.setMessage("System Alert");
         Notification result = notificationService.sendNotification(requestDto);
         assertEquals(NotificationStatus.SENT, result.getStatus());
-        verify(notificationRepository, times(1)).save(any(Notification.class));
+        verify(notificationRepository, times(2)).save(any(Notification.class));
     }
     @Test
     void retryFailedNotification_ShouldUpdateStatusToSent() {
         when(notificationRepository.findByStatus(NotificationStatus.FAILED)).thenReturn(List.of(failedNotification));
-        when(notificationRepository.saveAll(any())).thenReturn(List.of(sentNotification));
+        when(notificationRepository.save(any(Notification.class))).thenReturn(sentNotification);
         List<Notification> results = notificationService.retryFailedNotifications();
         assertEquals(1, results.size());
         assertEquals(NotificationStatus.SENT, results.get(0).getStatus());
-        verify(notificationRepository, times(1)).saveAll(any());
+        verify(notificationRepository, times(1)).save(any(Notification.class));
     }
 }

@@ -4,7 +4,6 @@ import com.remittance.notification.dto.NotificationRequestDto;
 import com.remittance.notification.entity.Notification;
 import com.remittance.enums.NotificationStatus;
 import com.remittance.notification.repository.NotificationRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,13 +17,13 @@ import java.util.UUID;
 
 public class NotificationService {
     private final NotificationRepository notificationRepository;
-    @Transactional
     public Notification sendNotification(NotificationRequestDto request) {
         Notification notification = Notification.builder()
                 .userId(request.getUserId())
                 .message(request.getMessage())
                 .status(NotificationStatus.PENDING)
                 .build();
+        notification = notificationRepository.save(notification);
         try {
             deliverEmailOrSms(request.getUserId(), request.getMessage());
             notification.setStatus(NotificationStatus.SENT);
@@ -34,9 +33,10 @@ public class NotificationService {
         }
         return notificationRepository.save(notification);
     }
-    @Transactional
+
     public List<Notification> retryFailedNotifications() {
         List<Notification> failedNotifications = notificationRepository.findByStatus(NotificationStatus.FAILED);
+        List<Notification> processedNotifications = new java.util.ArrayList<>();
         for (Notification notification : failedNotifications) {
             try {
                 deliverEmailOrSms(notification.getUserId(), notification.getMessage());
@@ -44,8 +44,9 @@ public class NotificationService {
             } catch (Exception e) {
                 log.error("Retry failed for notification ID: {}", notification.getId());
             }
+            processedNotifications.add(notificationRepository.save(notification));
         }
-        return notificationRepository.saveAll(failedNotifications);
+        return processedNotifications;
     }
     private void deliverEmailOrSms(UUID userId, String message) {
         log.info("Simulating dispatch to user {}: {}", userId, message);
