@@ -1,6 +1,7 @@
 package com.remittance.deposit.entity;
 
 import com.remittance.common.model.BaseEntity;
+import com.remittance.enums.DepositStatus;
 import com.remittance.quote.entity.Quote;
 import jakarta.persistence.*;
 import lombok.*;
