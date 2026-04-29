@@ -1,30 +1,37 @@
 package com.remittance.deposit.service;
 
+import com.remittance.deposit.dto.DepositRequestDto;
 import com.remittance.deposit.entity.Deposit;
 import com.remittance.deposit.repository.DepositRepository;
-import com.remittance.enums.DepositStatus;
+import com.remittance.deposit.entity.DepositStatus;
 import com.remittance.quote.entity.Quote;
+import com.remittance.quote.repository.QuoteRepository;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 
 public class DepositService {
     private final DepositRepository depositRepository;
 
+    private final QuoteRepository quoteRepository;
+
     @Transactional
-    public Deposit initiateDeposit(Quote quote,  String idempotencyKey) {
+    public Deposit initiateDeposit(DepositRequestDto request) {
+        Quote quote = quoteRepository.findById(request.getQuoteId()).orElseThrow(() -> new IllegalArgumentException("Quote not found"));
         Deposit deposit =  Deposit.builder()
                 .quote(quote)
                 .amount(quote.getTotalPayable())
                 .currency(quote.getFromCurrency())
                 .status(DepositStatus.PENDING)
-                .idempotencyKey(idempotencyKey)
+                .idempotencyKey(request.getIdempotencyKey())
                 .build();
 
         return depositRepository.save(deposit);

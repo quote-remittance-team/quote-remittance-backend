@@ -1,9 +1,11 @@
 package com.remittance.deposit.service;
 
+import com.remittance.deposit.dto.DepositRequestDto;
 import com.remittance.deposit.entity.Deposit;
 import com.remittance.deposit.repository.DepositRepository;
-import com.remittance.enums.DepositStatus;
+import com.remittance.deposit.entity.DepositStatus;
 import com.remittance.quote.entity.Quote;
+import com.remittance.quote.repository.QuoteRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,6 +26,9 @@ import static org.mockito.Mockito.*;
 class DepositServiceTest {
     @Mock
     private DepositRepository depositRepository;
+
+    @Mock
+    private QuoteRepository quoteRepository;
 
     @InjectMocks
     private DepositService depositService;
@@ -50,8 +56,12 @@ class DepositServiceTest {
     // Making a Deposit; test scenario
     @Test
     void initiateDeposit_ShouldCreateAndSaveDeposit() {
+        DepositRequestDto requestDto = new DepositRequestDto();
+        requestDto.setQuoteId(UUID.randomUUID());
+        requestDto.setIdempotencyKey(IDEMPOTENCY_KEY);
+        when(quoteRepository.findById(requestDto.getQuoteId())).thenReturn(Optional.of(mockQuote));
         when(depositRepository.save(any(Deposit.class))).thenReturn(mockDeposit);
-        Deposit result = depositService.initiateDeposit(mockQuote, IDEMPOTENCY_KEY);
+        Deposit result = depositService.initiateDeposit(requestDto);
         assertNotNull(result);
         assertEquals(DepositStatus.PENDING, result.getStatus());
         verify(depositRepository, times(1)).save(any(Deposit.class));
