@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(
@@ -33,7 +33,7 @@ public class Quote extends BaseEntity {
     @Column(name = "send_amount", nullable = false, precision = 18, scale = 2)
     private BigDecimal sendAmount;
 
-    @Column(name = "from_currency", nullable = false)
+    @Column(name = "from_currency", nullable = false, length = 3)
     private String fromCurrency;
 
     @Column(name = "to_currency", nullable = false)
@@ -56,5 +56,5 @@ public class Quote extends BaseEntity {
     private QuoteStatus status;
 
     @Column(name = "expires_at", nullable = false)
-    private LocalDateTime expiresAt;
+    private Instant expiresAt;
 }
