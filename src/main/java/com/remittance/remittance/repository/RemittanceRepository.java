@@ -16,4 +16,6 @@ public interface RemittanceRepository extends JpaRepository<Remittance, UUID> {
 
     Page<Remittance> findBySenderId(UUID senderId, Pageable pageable);
 
+    Optional<Remittance> findByIdempotencyKey(String idempotencyKey);
+
 }

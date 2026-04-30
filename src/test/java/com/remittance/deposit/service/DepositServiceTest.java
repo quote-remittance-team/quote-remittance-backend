@@ -3,7 +3,7 @@ package com.remittance.deposit.service;
 import com.remittance.deposit.dto.DepositRequestDto;
 import com.remittance.deposit.entity.Deposit;
 import com.remittance.deposit.repository.DepositRepository;
-import com.remittance.deposit.entity.DepositStatus;
+import com.remittance.enums.DepositStatus;
 import com.remittance.quote.entity.Quote;
 import com.remittance.quote.repository.QuoteRepository;
 import org.junit.jupiter.api.BeforeEach;
