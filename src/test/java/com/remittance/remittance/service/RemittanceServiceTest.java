@@ -1,23 +1,25 @@
 package com.remittance.remittance.service;
 
 import com.remittance.deposit.entity.Deposit;
-import com.remittance.enums.DepositStatus;
 import com.remittance.deposit.repository.DepositRepository;
+import com.remittance.enums.DepositStatus;
 import com.remittance.enums.QuoteStatus;
 import com.remittance.enums.RemittanceStatus;
-import com.remittance.payout.service.PayoutService;
 import com.remittance.quote.entity.Quote;
 import com.remittance.remittance.dto.CreateRemittanceRequest;
 import com.remittance.remittance.dto.RemittanceResponse;
 import com.remittance.remittance.entity.Remittance;
+import com.remittance.remittance.event.RemittanceCreatedEvent;
 import com.remittance.remittance.repository.RemittanceRepository;
 import com.remittance.remittance.service.impl.RemittanceServiceImpl;
 import com.remittance.user.entity.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
@@ -38,7 +40,7 @@ class RemittanceServiceTest {
     private RemittanceRepository remittanceRepository;
 
     @Mock
-    private PayoutService payoutService;
+    private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private RemittanceServiceImpl remittanceService;
@@ -129,8 +131,21 @@ class RemittanceServiceTest {
         verify(remittanceRepository)
                 .save(any(Remittance.class));
 
-        verify(payoutService)
-                .triggerPayout(any(Remittance.class));
+        ArgumentCaptor<RemittanceCreatedEvent> eventCaptor =
+                ArgumentCaptor.forClass(RemittanceCreatedEvent.class);
+
+        verify(eventPublisher)
+                .publishEvent(eventCaptor.capture());
+
+        RemittanceCreatedEvent publishedEvent =
+                eventCaptor.getValue();
+
+        assertNotNull(publishedEvent);
+
+        assertEquals(
+                "RMT-123456",
+                publishedEvent.getRemittance().getReference()
+        );
     }
 
     @Test
@@ -163,6 +178,9 @@ class RemittanceServiceTest {
 
         verify(remittanceRepository, never())
                 .save(any());
+
+        verify(eventPublisher, never())
+                .publishEvent(any());
     }
 
     @Test
@@ -205,6 +223,9 @@ class RemittanceServiceTest {
 
         verify(remittanceRepository, never())
                 .save(any());
+
+        verify(eventPublisher, never())
+                .publishEvent(any());
     }
 
     @Test
@@ -254,8 +275,8 @@ class RemittanceServiceTest {
         verify(remittanceRepository, never())
                 .save(any());
 
-        verify(payoutService, never())
-                .triggerPayout(any());
+        verify(eventPublisher, never())
+                .publishEvent(any());
     }
 
     @Test
@@ -308,7 +329,7 @@ class RemittanceServiceTest {
         verify(remittanceRepository, never())
                 .save(any());
 
-        verify(payoutService, never())
-                .triggerPayout(any());
+        verify(eventPublisher, never())
+                .publishEvent(any());
     }
 }

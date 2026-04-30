@@ -4,15 +4,16 @@ import com.remittance.deposit.entity.Deposit;
 import com.remittance.deposit.repository.DepositRepository;
 import com.remittance.enums.DepositStatus;
 import com.remittance.enums.RemittanceStatus;
-import com.remittance.payout.service.PayoutService;
 import com.remittance.quote.entity.Quote;
 import com.remittance.remittance.dto.CreateRemittanceRequest;
 import com.remittance.remittance.dto.RemittanceResponse;
 import com.remittance.remittance.entity.Remittance;
+import com.remittance.remittance.event.RemittanceCreatedEvent;
 import com.remittance.remittance.repository.RemittanceRepository;
 import com.remittance.remittance.service.RemittanceService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -23,7 +24,7 @@ public class RemittanceServiceImpl implements RemittanceService {
 
     private final DepositRepository depositRepository;
     private final RemittanceRepository remittanceRepository;
-    private final PayoutService payoutService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -75,7 +76,9 @@ public class RemittanceServiceImpl implements RemittanceService {
 
         Remittance savedRemittance = remittanceRepository.save(remittance);
 
-        payoutService.triggerPayout(savedRemittance);
+        eventPublisher.publishEvent(
+                new RemittanceCreatedEvent(savedRemittance)
+        );
 
         return RemittanceResponse.builder()
                 .remittanceId(savedRemittance.getId())
