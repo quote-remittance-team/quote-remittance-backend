@@ -23,6 +23,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
+
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -68,7 +69,7 @@ class RemittanceServiceTest {
                 .receiveAmount(BigDecimal.valueOf(160000))
                 .exchangeRate(BigDecimal.valueOf(1600))
                 .status(QuoteStatus.ACTIVE)
-                .expiresAt(Instant.now().plusSeconds(900))
+                .expiresAt(Instant.now())
                 .build();
 
         Deposit deposit = Deposit.builder()
@@ -100,6 +101,12 @@ class RemittanceServiceTest {
                 .status(RemittanceStatus.PROCESSING)
                 .idempotencyKey("idem-key-123")
                 .build();
+
+        ReflectionTestUtils.setField(
+                savedRemittance,
+                "createdAt",
+                Instant.now()
+        );
 
         when(depositRepository.findById(depositId))
                 .thenReturn(Optional.of(deposit));
@@ -280,7 +287,7 @@ class RemittanceServiceTest {
     }
 
     @Test
-    void shouldThrowExceptionForDuplicateIdempotencyKey() {
+    void shouldReturnExistingRemittanceForDuplicateIdempotencyKey() {
 
         UUID depositId = UUID.randomUUID();
 
@@ -293,8 +300,25 @@ class RemittanceServiceTest {
                         "idem-key-123"
                 );
 
+        User user = User.builder().build();
+
+        Quote quote = Quote.builder()
+                .quoteReference("QTE-123456")
+                .user(user)
+                .sendAmount(BigDecimal.valueOf(100))
+                .receiveAmount(BigDecimal.valueOf(160000))
+                .exchangeRate(BigDecimal.valueOf(1600))
+                .status(QuoteStatus.ACTIVE)
+                .expiresAt(Instant.now())
+                .build();
+
         Deposit deposit = Deposit.builder()
+                .quote(quote)
+                .amount(BigDecimal.valueOf(100))
+                .currency("USD")
                 .status(DepositStatus.CONFIRMED)
+                .paymentReference("PAY-123")
+                .idempotencyKey("deposit-idem")
                 .build();
 
         ReflectionTestUtils.setField(
@@ -304,7 +328,26 @@ class RemittanceServiceTest {
         );
 
         Remittance existingRemittance =
-                Remittance.builder().build();
+                Remittance.builder()
+                        .reference("RMT-EXISTING")
+                        .deposit(deposit)
+                        .quote(quote)
+                        .sender(user)
+                        .receiverName("John Doe")
+                        .receiverAccountNumber("0123456789")
+                        .receiverBankCode("044")
+                        .sendAmount(BigDecimal.valueOf(100))
+                        .receiveAmount(BigDecimal.valueOf(160000))
+                        .exchangeRate(BigDecimal.valueOf(1600))
+                        .status(RemittanceStatus.PROCESSING)
+                        .idempotencyKey("idem-key-123")
+                        .build();
+
+        ReflectionTestUtils.setField(
+                existingRemittance,
+                "createdAt",
+                Instant.now()
+        );
 
         when(depositRepository.findById(depositId))
                 .thenReturn(Optional.of(deposit));
@@ -315,15 +358,19 @@ class RemittanceServiceTest {
         when(remittanceRepository.findByIdempotencyKey("idem-key-123"))
                 .thenReturn(Optional.of(existingRemittance));
 
-        IllegalStateException exception =
-                assertThrows(
-                        IllegalStateException.class,
-                        () -> remittanceService.createRemittance(request)
-                );
+        RemittanceResponse response =
+                remittanceService.createRemittance(request);
+
+        assertNotNull(response);
 
         assertEquals(
-                "Duplicate request detected",
-                exception.getMessage()
+                "RMT-EXISTING",
+                response.getReference()
+        );
+
+        assertEquals(
+                RemittanceStatus.PROCESSING,
+                response.getStatus()
         );
 
         verify(remittanceRepository, never())

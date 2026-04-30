@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -49,13 +50,14 @@ public class RemittanceServiceImpl implements RemittanceService {
                     );
                 });
 
-        remittanceRepository.findByIdempotencyKey(
-                request.getIdempotencyKey())
-                .ifPresent(existing -> {
-                    throw new IllegalStateException(
-                            "Duplicate request detected"
-                    );
-                });
+        Optional<Remittance> existingRemittance =
+                remittanceRepository.findByIdempotencyKey(
+                        request.getIdempotencyKey()
+                );
+        if (existingRemittance.isPresent()) {
+
+            return mapToResponse(existingRemittance.get());
+        }
 
         Quote quote = deposit.getQuote();
 
@@ -95,5 +97,18 @@ public class RemittanceServiceImpl implements RemittanceService {
         return "RMT-" + UUID.randomUUID()
                 .toString()
                 .toUpperCase();
+    }
+
+    private RemittanceResponse mapToResponse(
+            Remittance remittance
+    ) {
+
+        return RemittanceResponse.builder()
+                .reference(remittance.getReference())
+                .status(remittance.getStatus())
+                .sendAmount(remittance.getSendAmount())
+                .receiveAmount(remittance.getReceiveAmount())
+                .createdAt(remittance.getCreatedAt())
+                .build();
     }
 }
