@@ -72,8 +72,9 @@ public class DepositControllerTest {
     void handleWebhook_ShouldReturn200Ok() throws Exception {
         DepositWebhookDto webhookDto = new DepositWebhookDto();
         webhookDto.setPaymentReference("PAY-12345");
+        webhookDto.setStatus(DepositStatus.CONFIRMED);
         when(depositService.handlePaymentCallback(anyString(),any())).thenReturn(mockDeposit);
-        mockMvc.perform(post("/deposits/webhook").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(webhookDto))).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(mockDeposit.getId().toString()));
+        mockMvc.perform(post("/deposits/webhook").header("X-Provider-Signature", "whsec_super_secret_bouncers_password_12345").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(webhookDto))).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(mockDeposit.getId().toString()));
         verify(depositService, times(1)).handlePaymentCallback(anyString(),any());
     }
 }
