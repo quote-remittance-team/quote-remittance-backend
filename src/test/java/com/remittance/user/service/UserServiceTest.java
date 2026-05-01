@@ -1,5 +1,6 @@
 package com.remittance.user.service;
 
+import com.remittance.common.exception.UserNotFoundException;
 import com.remittance.user.dto.RegisterUserRequest;
 import com.remittance.user.dto.UserResponse;
 import com.remittance.user.entity.User;
@@ -13,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,8 +33,6 @@ class UserServiceTest {
 
     @Test
     void shouldRegisterUserSuccessfully() {
-
-        UUID userId = UUID.randomUUID();
 
         RegisterUserRequest request = RegisterUserRequest.builder()
                 .email("test@example.com")
@@ -89,8 +87,6 @@ class UserServiceTest {
     @Test
     void shouldGetUserByEmailSuccessfully() {
 
-        UUID userId = UUID.randomUUID();
-
         User user = User.builder()
                 .email("test@example.com")
                 .passwordHash("hashed-password")
@@ -113,8 +109,8 @@ class UserServiceTest {
         when(userRepository.findByEmailIgnoreCase("missing@example.com"))
                 .thenReturn(Optional.empty());
 
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        UserNotFoundException exception = assertThrows(
+                UserNotFoundException.class,
                 () -> userService.getUserByEmail("missing@example.com")
         );
 

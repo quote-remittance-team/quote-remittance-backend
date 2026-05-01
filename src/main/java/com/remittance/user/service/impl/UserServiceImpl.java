@@ -1,5 +1,6 @@
 package com.remittance.user.service.impl;
 
+import com.remittance.common.exception.UserNotFoundException;
 import com.remittance.user.dto.RegisterUserRequest;
 import com.remittance.user.dto.UserResponse;
 import com.remittance.user.entity.User;
@@ -55,7 +56,7 @@ public class UserServiceImpl implements UserService {
         String normalizedEmail = email.trim().toLowerCase();
 
         User user = userRepository.findByEmailIgnoreCase(normalizedEmail)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         return UserResponse.builder()
                 .id(user.getId())
