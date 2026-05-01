@@ -28,7 +28,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@WebMvcTest(DepositController.class)
+@WebMvcTest(
+        controllers = DepositController.class,
+        properties = {"remittance.webhook.secret=dummy-test-secret"}
+        )
 @AutoConfigureMockMvc(addFilters = false)
 public class DepositControllerTest {
 
@@ -74,7 +77,7 @@ public class DepositControllerTest {
         webhookDto.setPaymentReference("PAY-12345");
         webhookDto.setStatus(DepositStatus.CONFIRMED);
         when(depositService.handlePaymentCallback(anyString(),any())).thenReturn(mockDeposit);
-        mockMvc.perform(post("/deposits/webhook").header("X-Provider-Signature", "whsec_super_secret_bouncers_password_12345").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(webhookDto))).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(mockDeposit.getId().toString()));
+        mockMvc.perform(post("/deposits/webhook").header("X-Provider-Signature", "dummy-test-secret").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(webhookDto))).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(mockDeposit.getId().toString()));
         verify(depositService, times(1)).handlePaymentCallback(anyString(),any());
     }
 }
