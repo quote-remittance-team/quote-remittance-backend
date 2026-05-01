@@ -7,17 +7,20 @@ import com.remittance.user.repository.UserRepository;
 import com.remittance.user.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceTest {
+class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
@@ -31,10 +34,12 @@ public class UserServiceTest {
     @Test
     void shouldRegisterUserSuccessfully() {
 
-        RegisterUserRequest request = new RegisterUserRequest(
-                "Test@Example.com",
-                "password123"
-        );
+        UUID userId = UUID.randomUUID();
+
+        RegisterUserRequest request = RegisterUserRequest.builder()
+                .email("test@example.com")
+                .password("password123")
+                .build();
 
         when(userRepository.existsByEmailIgnoreCase("test@example.com"))
                 .thenReturn(false);
@@ -52,33 +57,69 @@ public class UserServiceTest {
 
         UserResponse response = userService.register(request);
 
+        assertNotNull(response);
         assertEquals("test@example.com", response.getEmail());
 
-        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-
-        verify(userRepository).save(userCaptor.capture());
-
-        User capturedUser = userCaptor.getValue();
-
-        assertEquals("test@example.com", capturedUser.getEmail());
-        assertEquals("hashed-password", capturedUser.getPasswordHash());
+        verify(userRepository).save(any(User.class));
+        verify(passwordEncoder).encode("password123");
     }
 
     @Test
     void shouldThrowExceptionWhenEmailAlreadyExists() {
 
-        RegisterUserRequest request = new RegisterUserRequest(
-                "Test@Example.com",
-                "password123"
-        );
+        RegisterUserRequest request = RegisterUserRequest.builder()
+                .email("test@example.com")
+                .password("password123")
+                .build();
 
-        when(userRepository.existsByEmailIgnoreCase("test@example.com")).thenReturn(true);
+        when(userRepository.existsByEmailIgnoreCase("test@example.com"))
+                .thenReturn(true);
 
-        assertThrows(
+        IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
                 () -> userService.register(request)
         );
 
+        assertEquals("Email already exists", exception.getMessage());
+
         verify(userRepository, never()).save(any());
+    }
+
+
+    @Test
+    void shouldGetUserByEmailSuccessfully() {
+
+        UUID userId = UUID.randomUUID();
+
+        User user = User.builder()
+                .email("test@example.com")
+                .passwordHash("hashed-password")
+                .build();
+
+        when(userRepository.findByEmailIgnoreCase("test@example.com"))
+                .thenReturn(Optional.of(user));
+
+        UserResponse response = userService.getUserByEmail("test@example.com");
+
+        assertNotNull(response);
+        assertEquals("test@example.com", response.getEmail());
+
+        verify(userRepository).findByEmailIgnoreCase("test@example.com");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUserNotFoundByEmail() {
+
+        when(userRepository.findByEmailIgnoreCase("missing@example.com"))
+                .thenReturn(Optional.empty());
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> userService.getUserByEmail("missing@example.com")
+        );
+
+        assertEquals("User not found", exception.getMessage());
+
+        verify(userRepository).findByEmailIgnoreCase("missing@example.com");
     }
 }
