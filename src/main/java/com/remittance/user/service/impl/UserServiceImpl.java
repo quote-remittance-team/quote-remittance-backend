@@ -49,4 +49,18 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public UserResponse getUserByEmail(String email) {
+
+        String normalizedEmail = email.trim().toLowerCase();
+
+        User user = userRepository.findByEmailIgnoreCase(normalizedEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        return UserResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .build();
+    }
+
 }
