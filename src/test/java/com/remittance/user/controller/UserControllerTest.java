@@ -21,9 +21,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(
@@ -84,5 +86,31 @@ class UserControllerTest {
                                 .content(objectMapper.writeValueAsString(request))
                 )
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturnCurrentUserSuccessfully() throws Exception {
+
+        String email = "test@example.com";
+        UUID userId = UUID.randomUUID();
+
+        UserResponse response = UserResponse.builder()
+                .id(userId)
+                .email(email)
+                .build();
+
+        when(userService.getUserByEmail(email))
+                .thenReturn(response);
+
+        mockMvc.perform(
+                        get("/users/me")
+                                .param("email", email)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(userId.toString()))
+                .andExpect(jsonPath("$.email").value(email));
+
+        verify(userService).getUserByEmail(email);
     }
 }
