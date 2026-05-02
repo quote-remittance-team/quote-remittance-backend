@@ -1,6 +1,7 @@
 package com.remittance.deposit.controller;
 
 import com.remittance.deposit.dto.DepositRequestDto;
+import com.remittance.deposit.dto.DepositResponseDto;
 import com.remittance.deposit.dto.DepositWebhookDto;
 import com.remittance.deposit.entity.Deposit;
 import com.remittance.deposit.service.DepositService;
@@ -27,9 +28,9 @@ public class DepositController {
 
     // POST/deposits
     @PostMapping
-    public ResponseEntity<Deposit> createDeposit(@Valid  @RequestBody DepositRequestDto request) {
+    public ResponseEntity<DepositResponseDto> createDeposit(@Valid  @RequestBody DepositRequestDto request) {
         log.info("Received request to initiate deposit for quote ID {}", request.getQuoteId());
-        Deposit createdDeposit = depositService.initiateDeposit(request);
+        DepositResponseDto createdDeposit = depositService.initiateDeposit(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdDeposit);
     }
     // POST /deposits/webhook
