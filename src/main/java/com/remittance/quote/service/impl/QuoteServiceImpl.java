@@ -95,6 +95,27 @@ public class QuoteServiceImpl implements QuoteService {
 
     }
 
+    @Override
+    public  QuoteResponse getQuoteById(UUID id) {
+
+        Quote quote = quoteRepository.findById(id)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Quote not found"));
+
+        return QuoteResponse.builder()
+                .quoteId(quote.getId())
+                .quoteReference(quote.getQuoteReference())
+                .sendAmount(quote.getSendAmount())
+                .fromCurrency(quote.getFromCurrency())
+                .toCurrency(quote.getToCurrency())
+                .exchangeRate(quote.getExchangeRate())
+                .fee(quote.getFee())
+                .receiveAmount(quote.getReceiveAmount())
+                .totalPayable(quote.getTotalPayable())
+                .expiresAt(quote.getExpiresAt())
+                .build();
+    }
+
     /**
      * Temporary mock exchange rate logic.
      * External FX provider integration comes later.
