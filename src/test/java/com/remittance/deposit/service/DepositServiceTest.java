@@ -70,13 +70,14 @@ class DepositServiceTest {
 
         PaystackInitializeResponseDto mockPaystackResponse = new PaystackInitializeResponseDto();
         PaystackInitializeResponseDto.PaystackData mockPaystackData = new PaystackInitializeResponseDto.PaystackData();
+        mockPaystackResponse.setStatus(true);
         mockPaystackData.setReference("PAY-12345");
         mockPaystackData.setAuthorisationUrl("hhtps://checkout.paystack.com/fake-url");
         mockPaystackResponse.setData(mockPaystackData);
         when(paymentClient.initializeTransaction(any(PaystackInitializeRequestDto.class))).thenReturn(mockPaystackResponse);
 
         when(depositRepository.save(any(Deposit.class))).thenReturn(mockDeposit);
-        DepositResponseDto result = depositService.initiateDeposit(requestDto);
+        DepositResponseDto result = depositService.initiateDeposit(requestDto, "test@example.com");
         assertNotNull(result);
         assertEquals(DepositStatus.PENDING, result.getStatus());
         verify(paymentClient, times(1)).initializeTransaction(any(PaystackInitializeRequestDto.class));

@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.server.ResponseStatusException;
@@ -29,9 +31,11 @@ public class DepositController {
     // POST/deposits
     @PostMapping
     public ResponseEntity<DepositResponseDto> createDeposit(@Valid  @RequestBody DepositRequestDto request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String customerEmail = authentication.getName();
         log.info("Received request to initiate deposit for quote ID {}", request.getQuoteId());
-        DepositResponseDto createdDeposit = depositService.initiateDeposit(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdDeposit);
+        DepositResponseDto responseDto = depositService.initiateDeposit(request, customerEmail);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
     // POST /deposits/webhook
     @PostMapping("/webhook")

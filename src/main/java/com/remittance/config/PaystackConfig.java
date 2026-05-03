@@ -10,7 +10,7 @@ import org.springframework.web.client.RestClient;
 @Configuration
 public class PaystackConfig {
     @Bean(name = "paystackRestClient")
-    public RestClient paystackRestClient(@Value("${paystack.api.url}") String paystackUrl, @Value("${PAYSTACK_API_SECRET}") String paystackApiSecret) {
+    public RestClient paystackRestClient(@Value("${paystack.api.url}") String paystackUrl, @Value("${paystack.api.secret}") String paystackApiSecret) {
         return RestClient.builder()
                 .baseUrl(paystackUrl)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + paystackApiSecret)

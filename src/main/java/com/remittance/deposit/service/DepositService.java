@@ -17,31 +17,28 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 
 public class DepositService {
     private final DepositRepository depositRepository;
-
     private final QuoteRepository quoteRepository;
-
     private final PaymentClient paymentClient;
 
-    @Transactional
-    public DepositResponseDto initiateDeposit(DepositRequestDto request) {
+    public DepositResponseDto initiateDeposit(DepositRequestDto request, String customerEmail) {
         Quote quote = quoteRepository.findById(request.getQuoteId()).orElseThrow(() -> new IllegalArgumentException("Quote not found"));
         String currency = quote.getFromCurrency();
-        //Paystack amount format(Lowest denomination, multiplies by 100 to remove decimals e.g 100.50 becomes "10050")
+        BigDecimal multiplier = getCurrencyMultiplier(currency);
         String amountInSubunits = quote.getTotalPayable()
-                .multiply(BigDecimal.valueOf(100))
+                .multiply(multiplier)
                 .toBigInteger()
                 .toString();
 
         //Generate a unique tracking reference
         String paymentReference = UUID.randomUUID().toString();
 
-        String customerEmail = "customer@example.com";
         PaystackInitializeRequestDto paystackRequest = PaystackInitializeRequestDto.builder()
                 .email(customerEmail)
                 .amount(amountInSubunits)
@@ -49,6 +46,10 @@ public class DepositService {
                 .build();
 
         var paystackResponse = paymentClient.initializeTransaction(paystackRequest);
+        if (paystackResponse == null || !paystackResponse.isStatus() || paystackResponse.getData() == null) {
+            log.error("Paystack initialization failed or returned null data for reference: {}", paymentReference);
+            throw new RuntimeException("Payment gateway initialization failed");
+        }
         Deposit deposit =  Deposit.builder()
                 .quote(quote)
                 .amount(quote.getTotalPayable())
@@ -84,5 +85,14 @@ public class DepositService {
 
         deposit.setStatus(newStatus);
         return depositRepository.save(deposit);
+    }
+
+    private BigDecimal getCurrencyMultiplier(String currency) {
+        if (currency == null) return BigDecimal.valueOf(100);
+        return switch (currency.toUpperCase()) {
+            case "JPY", "KRW", "VND" -> BigDecimal.ONE;
+            case "KWD", "BHD", "OMR", "JOD" -> BigDecimal.valueOf(1000);
+            default -> BigDecimal.valueOf(100);
+        };
     }
 }

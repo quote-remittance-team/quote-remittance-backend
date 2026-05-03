@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.security.test.context.support.WithMockUser;
 
+
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -76,7 +77,7 @@ public class DepositControllerTest {
     void createDeposit_ShouldReturn201Created() throws Exception {
         DepositRequestDto requestDto = new DepositRequestDto();
         requestDto.setQuoteId(UUID.randomUUID());
-        when(depositService.initiateDeposit(any(DepositRequestDto.class))).thenReturn(mockDepositResponseDto);
+        when(depositService.initiateDeposit(any(DepositRequestDto.class), anyString())).thenReturn(mockDepositResponseDto);
         mockMvc.perform(post("/deposits")
                 .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isCreated())
@@ -85,7 +86,7 @@ public class DepositControllerTest {
                 .andExpect(jsonPath("$.currency").value(mockDepositResponseDto.getCurrency()))
                 .andExpect(jsonPath("$.status").value(mockDepositResponseDto.getStatus().toString()))
                 .andExpect(jsonPath("$.checkoutUrl").value(mockDepositResponseDto.getCheckoutUrl()));
-        verify(depositService, times(1)).initiateDeposit(any(DepositRequestDto.class));
+        verify(depositService, times(1)).initiateDeposit(any(DepositRequestDto.class), anyString());
     }
 
     @Test
