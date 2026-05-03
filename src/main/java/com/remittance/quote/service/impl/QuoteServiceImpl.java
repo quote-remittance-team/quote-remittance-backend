@@ -82,18 +82,7 @@ public class QuoteServiceImpl implements QuoteService {
 
         Quote savedQuote = quoteRepository.save(quote);
 
-        return QuoteResponse.builder()
-                .quoteId(savedQuote.getId())
-                .quoteReference(savedQuote.getQuoteReference())
-                .sendAmount(savedQuote.getSendAmount())
-                .fromCurrency(savedQuote.getFromCurrency())
-                .toCurrency(savedQuote.getToCurrency())
-                .exchangeRate(savedQuote.getExchangeRate())
-                .fee(savedQuote.getFee())
-                .receiveAmount(savedQuote.getReceiveAmount())
-                .totalPayable(savedQuote.getTotalPayable())
-                .expiresAt(savedQuote.getExpiresAt())
-                .build();
+        return mapToResponse(savedQuote);
 
     }
 
@@ -107,18 +96,7 @@ public class QuoteServiceImpl implements QuoteService {
                                 "Quote not found"
                         ));
 
-        return QuoteResponse.builder()
-                .quoteId(quote.getId())
-                .quoteReference(quote.getQuoteReference())
-                .sendAmount(quote.getSendAmount())
-                .fromCurrency(quote.getFromCurrency())
-                .toCurrency(quote.getToCurrency())
-                .exchangeRate(quote.getExchangeRate())
-                .fee(quote.getFee())
-                .receiveAmount(quote.getReceiveAmount())
-                .totalPayable(quote.getTotalPayable())
-                .expiresAt(quote.getExpiresAt())
-                .build();
+        return mapToResponse(quote);
     }
 
     /**
@@ -155,5 +133,21 @@ public class QuoteServiceImpl implements QuoteService {
         return "QTE-" + UUID.randomUUID()
                 .toString()
                 .toUpperCase();
+    }
+
+    private QuoteResponse mapToResponse(Quote quote) {
+
+        return QuoteResponse.builder()
+                .quoteId(quote.getId())
+                .quoteReference(quote.getQuoteReference())
+                .sendAmount(quote.getSendAmount())
+                .fromCurrency(quote.getFromCurrency())
+                .toCurrency(quote.getToCurrency())
+                .exchangeRate(quote.getExchangeRate())
+                .fee(quote.getFee())
+                .receiveAmount(quote.getReceiveAmount())
+                .totalPayable(quote.getTotalPayable())
+                .expiresAt(quote.getExpiresAt())
+                .build();
     }
 }
