@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -37,9 +38,12 @@ public class QuoteController {
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public String handleIllegalArgumentException(
+    public Map<String, String> handleIllegalArgumentException(
             IllegalArgumentException ex
     ) {
-        return ex.getMessage();
+        return Map.of(
+                "error",
+                ex.getMessage()
+        );
     }
 }
