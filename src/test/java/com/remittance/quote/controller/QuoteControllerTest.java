@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -155,5 +157,23 @@ class QuoteControllerTest {
                 .andExpect(jsonPath("$.quoteReference").value("QTE-654321"))
                 .andExpect(jsonPath("$.fromCurrency").value("GBP"))
                 .andExpect(jsonPath("$.toCurrency").value("NGN"));
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenQuoteDoesNotExist() throws Exception {
+
+        UUID quoteId = UUID.randomUUID();
+
+        when(quoteService.getQuoteById(quoteId))
+                .thenThrow(
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Quote not found"
+                        )
+                );
+
+        mockMvc.perform(
+                get("/quotes/{id}", quoteId)
+        ).andExpect(status().isNotFound());
     }
 }

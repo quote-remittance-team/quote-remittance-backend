@@ -12,7 +12,9 @@ import com.remittance.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -100,7 +102,10 @@ public class QuoteServiceImpl implements QuoteService {
 
         Quote quote = quoteRepository.findById(id)
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Quote not found"));
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Quote not found"
+                        ));
 
         return QuoteResponse.builder()
                 .quoteId(quote.getId())
