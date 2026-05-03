@@ -15,4 +15,7 @@ public interface QuoteRepository extends JpaRepository<Quote, UUID> {
     Optional<Quote> findByIdAndUser_Id(UUID id, UUID userId);
 
     Optional<Quote> findByQuoteReference(String quoteReference);
+
+    Optional<Quote> findByIdAndUserEmailIgnoreCase(UUID id, String email);
+
 }

@@ -6,6 +6,7 @@ import com.remittance.quote.service.QuoteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -29,10 +30,11 @@ public class QuoteController {
 
     @GetMapping("/{id}")
     public QuoteResponse getQuoteById(
-            @PathVariable UUID id
+            @PathVariable UUID id,
+            Authentication authentication
     ) {
 
-        return quoteService.getQuoteById(id);
+        return quoteService.getQuoteById(id, authentication.getName());
     }
 
 

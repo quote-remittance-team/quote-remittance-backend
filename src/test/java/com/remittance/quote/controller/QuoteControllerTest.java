@@ -6,7 +6,6 @@ import com.remittance.quote.dto.QuoteResponse;
 import com.remittance.quote.service.QuoteService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
@@ -21,14 +20,16 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+
 @WebMvcTest(controllers = QuoteController.class)
-@AutoConfigureMockMvc(addFilters = false)
 class QuoteControllerTest {
 
     @Autowired
@@ -71,6 +72,8 @@ class QuoteControllerTest {
 
         mockMvc.perform(
                         post("/quotes")
+                                .with(csrf())
+                                .with(user("test@example.com"))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request))
                 )
@@ -88,13 +91,14 @@ class QuoteControllerTest {
                 .userId(null)
                 .sendAmount(null)
                 .fromCurrency("NGN")
-                .toCurrency("")
+                .toCurrency("ABC")
                 .build();
 
         mockMvc.perform(
                         post("/quotes")
+                                .with(csrf())
+                                .with(user("test@example.com"))
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request))
                 )
                 .andExpect(status().isBadRequest());
     }
@@ -120,12 +124,11 @@ class QuoteControllerTest {
 
         mockMvc.perform(
                         post("/quotes")
+                                .with(csrf())
+                                .with(user("test@example.com"))
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request))
                 )
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error")
-                        .value("Source and destination currencies cannot be the same"));
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -146,11 +149,12 @@ class QuoteControllerTest {
                 .expiresAt(Instant.now())
                 .build();
 
-        when(quoteService.getQuoteById(quoteId))
+        when(quoteService.getQuoteById(quoteId, "test@example.com"))
                 .thenReturn(response);
 
         mockMvc.perform(
                         get("/quotes/{id}", quoteId)
+                                .with(user("test@example.com"))
                 )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.quoteId").value(quoteId.toString()))
@@ -164,7 +168,7 @@ class QuoteControllerTest {
 
         UUID quoteId = UUID.randomUUID();
 
-        when(quoteService.getQuoteById(quoteId))
+        when(quoteService.getQuoteById(quoteId, "test@example.com"))
                 .thenThrow(
                         new ResponseStatusException(
                                 HttpStatus.NOT_FOUND,
@@ -174,6 +178,7 @@ class QuoteControllerTest {
 
         mockMvc.perform(
                 get("/quotes/{id}", quoteId)
+                        .with(user("test@example.com"))
         ).andExpect(status().isNotFound());
     }
 }

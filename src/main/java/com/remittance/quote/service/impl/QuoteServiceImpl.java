@@ -87,9 +87,9 @@ public class QuoteServiceImpl implements QuoteService {
     }
 
     @Override
-    public  QuoteResponse getQuoteById(UUID id) {
+    public  QuoteResponse getQuoteById(UUID id, String userEmail) {
 
-        Quote quote = quoteRepository.findById(id)
+        Quote quote = quoteRepository.findByIdAndUserEmailIgnoreCase(id, userEmail)
                 .orElseThrow(() ->
                         new ResponseStatusException(
                                 HttpStatus.NOT_FOUND,
