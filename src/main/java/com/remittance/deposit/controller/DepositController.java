@@ -29,7 +29,7 @@ public class DepositController {
     private String expectedWebhookSecret;
 
     // POST/deposits
-    @PostMapping
+    @PostMapping()
     public ResponseEntity<DepositResponseDto> createDeposit(@Valid  @RequestBody DepositRequestDto request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String customerEmail = authentication.getName();
