@@ -2,7 +2,7 @@ package com.remittance.integration.payout.dto;
 
 public record TransferRequest (
         String source,
-        Integer amount,
+        Long amount,
         String recipient,
         String reason
 ) {}

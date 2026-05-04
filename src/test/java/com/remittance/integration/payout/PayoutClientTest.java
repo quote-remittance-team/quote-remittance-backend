@@ -26,10 +26,6 @@ public class PayoutClientTest {
                 "NGN"
         );
         TransferRecipientResponse response = payoutClient.createTransferRecipient(request);
-        System.out.println("================================================");
-        System.out.println("PAYSTACK RESPONSE STATUS: " + response.status());
-        System.out.println("PAYSTACK RECIPIENT CODE: " + response.data().recipientCode());
-        System.out.println("================================================");
         assertTrue(response.status(), "Paystack should return a true status");
         assertNotNull(response.data().recipientCode(), "The speed-dial code must not be null");
     }
