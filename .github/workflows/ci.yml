@@ -51,7 +51,7 @@ jobs:
         run: ./mvnw test
         env:
             PAYSTACK_API_SECRET: ${{secrets.PAYSTACK_API_SECRET}}
-            REMMITTANCE_WEBHOOK_SECRET: ${{secrets.REMMITANCE_WEBHOOK_SECRET}}
+            REMITTANCE_WEBHOOK_SECRET: ${{secrets.REMMITANCE_WEBHOOK_SECRET}}
 
       - name: Build Application
         run: ./mvnw clean package -DskipTests
