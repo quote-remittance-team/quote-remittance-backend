@@ -2,6 +2,7 @@ package com.remittance.deposit.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.remittance.deposit.dto.DepositRequestDto;
+import com.remittance.deposit.dto.DepositResponseDto;
 import com.remittance.deposit.dto.DepositWebhookDto;
 import com.remittance.deposit.entity.Deposit;
 import com.remittance.deposit.service.DepositService;
@@ -16,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.security.test.context.support.WithMockUser;
+
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -49,6 +51,8 @@ public class DepositControllerTest {
 
     private Deposit mockDeposit;
 
+    private DepositResponseDto mockDepositResponseDto;
+
     @BeforeEach
     void setUp() {
          mockDeposit = Deposit.builder()
@@ -59,15 +63,30 @@ public class DepositControllerTest {
                 .idempotencyKey("idem-key-123")
                 .build();
         org.springframework.test.util.ReflectionTestUtils.setField(mockDeposit, "id", java.util.UUID.randomUUID());
+
+        mockDepositResponseDto = DepositResponseDto.builder()
+                .id(UUID.randomUUID())
+                .amount(new BigDecimal("100.00"))
+                .currency("USD")
+                .status(DepositStatus.PENDING)
+                .checkoutUrl("https://checkout.paystack.com/fake-url")
+                .build();
     }
     @Test
     @WithMockUser
     void createDeposit_ShouldReturn201Created() throws Exception {
         DepositRequestDto requestDto = new DepositRequestDto();
         requestDto.setQuoteId(UUID.randomUUID());
-        when(depositService.initiateDeposit(any(DepositRequestDto.class))).thenReturn(mockDeposit);
-        mockMvc.perform(post("/deposits").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(requestDto))).andExpect(status().isCreated()).andExpect(jsonPath("$.id").value(mockDeposit.getId().toString()));
-        verify(depositService, times(1)).initiateDeposit(any(DepositRequestDto.class));
+        when(depositService.initiateDeposit(any(DepositRequestDto.class), anyString())).thenReturn(mockDepositResponseDto);
+        mockMvc.perform(post("/deposits")
+                .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(mockDepositResponseDto.getId().toString()))
+                .andExpect(jsonPath("$.amount").value(mockDepositResponseDto.getAmount().doubleValue()))
+                .andExpect(jsonPath("$.currency").value(mockDepositResponseDto.getCurrency()))
+                .andExpect(jsonPath("$.status").value(mockDepositResponseDto.getStatus().toString()))
+                .andExpect(jsonPath("$.checkoutUrl").value(mockDepositResponseDto.getCheckoutUrl()));
+        verify(depositService, times(1)).initiateDeposit(any(DepositRequestDto.class), anyString());
     }
 
     @Test
