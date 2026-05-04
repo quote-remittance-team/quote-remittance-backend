@@ -12,7 +12,9 @@ import com.remittance.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -80,19 +82,21 @@ public class QuoteServiceImpl implements QuoteService {
 
         Quote savedQuote = quoteRepository.save(quote);
 
-        return QuoteResponse.builder()
-                .quoteId(savedQuote.getId())
-                .quoteReference(savedQuote.getQuoteReference())
-                .sendAmount(savedQuote.getSendAmount())
-                .fromCurrency(savedQuote.getFromCurrency())
-                .toCurrency(savedQuote.getToCurrency())
-                .exchangeRate(savedQuote.getExchangeRate())
-                .fee(savedQuote.getFee())
-                .receiveAmount(savedQuote.getReceiveAmount())
-                .totalPayable(savedQuote.getTotalPayable())
-                .expiresAt(savedQuote.getExpiresAt())
-                .build();
+        return mapToResponse(savedQuote);
 
+    }
+
+    @Override
+    public  QuoteResponse getQuoteById(UUID id, String userEmail) {
+
+        Quote quote = quoteRepository.findByIdAndUserEmailIgnoreCase(id, userEmail)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Quote not found"
+                        ));
+
+        return mapToResponse(quote);
     }
 
     /**
@@ -129,5 +133,21 @@ public class QuoteServiceImpl implements QuoteService {
         return "QTE-" + UUID.randomUUID()
                 .toString()
                 .toUpperCase();
+    }
+
+    private QuoteResponse mapToResponse(Quote quote) {
+
+        return QuoteResponse.builder()
+                .quoteId(quote.getId())
+                .quoteReference(quote.getQuoteReference())
+                .sendAmount(quote.getSendAmount())
+                .fromCurrency(quote.getFromCurrency())
+                .toCurrency(quote.getToCurrency())
+                .exchangeRate(quote.getExchangeRate())
+                .fee(quote.getFee())
+                .receiveAmount(quote.getReceiveAmount())
+                .totalPayable(quote.getTotalPayable())
+                .expiresAt(quote.getExpiresAt())
+                .build();
     }
 }
