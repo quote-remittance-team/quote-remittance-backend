@@ -12,7 +12,20 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: admin123
+          POSTGRES_DB: remittance
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -36,6 +49,12 @@ jobs:
 
       - name: Run Tests
         run: ./mvnw test
+        env:
+            PAYSTACK_API_SECRET: ${{secrets.PAYSTACK_API_SECRET}}
+            REMITTANCE_WEBHOOK_SECRET: ${{secrets.REMMITANCE_WEBHOOK_SECRET}}
 
       - name: Build Application
         run: ./mvnw clean package -DskipTests
+        env:
+          PAYSTACK_API_SECRET: ${{secrets.PAYSTACK_API_SECRET}}
+          REMMITTANCE_WEBHOOK_SECRET: ${{secrets.REMMITANCE_WEBHOOK_SECRET}}
