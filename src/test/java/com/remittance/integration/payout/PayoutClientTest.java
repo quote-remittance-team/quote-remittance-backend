@@ -20,9 +20,9 @@ public class PayoutClientTest {
                 "nuban",
                 "Intgration Test User",
                 // use real account number if you want to test it, that's what I did
-                "0000000000",
+                "0069087573",
                 // use real bank code for testing, that's what i did
-                "033",
+                "044",
                 "NGN"
         );
         TransferRecipientResponse response = payoutClient.createTransferRecipient(request);
