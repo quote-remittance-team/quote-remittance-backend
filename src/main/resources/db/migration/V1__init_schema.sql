@@ -1,7 +1,7 @@
 CREATE TABLE users (
     id UUID PRIMARY KEY,
     created_at TIMESTAMP(6) WITH TIME ZONE NOT NULL,
-    updated_at TIMESTAMP(6) NOT NULL,
+    updated_at TIMESTAMP(6) WITH TIME ZONE NOT NULL,
     email VARCHAR(255) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     CONSTRAINT uk_users_email UNIQUE (email)
@@ -10,7 +10,7 @@ CREATE TABLE users (
 CREATE TABLE quotes (
     id UUID PRIMARY KEY,
     created_at TIMESTAMP(6) WITH TIME ZONE NOT NULL,
-    updated_at TIMESTAMP(6) NOT NULL,
+    updated_at TIMESTAMP(6) WITH TIME ZONE NOT NULL,
     exchange_rate NUMERIC(18,16) NOT NULL,
     expires_at TIMESTAMP(6) WITH TIME ZONE NOT NULL,
     fee NUMERIC(18,2) NOT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE quotes (
     receive_amount NUMERIC(18,2) NOT NULL,
     send_amount NUMERIC(18,2) NOT NULL,
     status VARCHAR(255) NOT NULL CHECK ( status IN ('ACTIVE', 'USED', 'EXPIRED')),
-    to_currency VARCHAR(255) NOT NULL,
+    to_currency VARCHAR(3) NOT NULL,
     total_payable NUMERIC(18,2) NOT NULL,
     user_id UUID NOT NULL,
     CONSTRAINT uk_quote_reference UNIQUE (quote_reference),
@@ -28,8 +28,8 @@ CREATE TABLE quotes (
 CREATE TABLE deposits (
     id UUID PRIMARY KEY,
     created_at TIMESTAMP(6) WITH TIME ZONE NOT NULL,
-    updated_at TIMESTAMP(6) NOT NULL,
-    amount NUMERIC(38,2) NOT NULL,
+    updated_at TIMESTAMP(6) WITH TIME ZONE NOT NULL,
+    amount NUMERIC(18,2) NOT NULL,
     currency VARCHAR(3) NOT NULL,
     status VARCHAR(255) NOT NULL CHECK ( status IN ('PENDING', 'CONFIRMED', 'FAILED')),
     payment_reference VARCHAR(255) NOT NULL,
@@ -41,7 +41,7 @@ CREATE TABLE deposits (
 CREATE TABLE remittances (
     id UUID PRIMARY KEY,
     created_at TIMESTAMP(6) WITH TIME ZONE NOT NULL,
-    updated_at TIMESTAMP(6) NOT NULL,
+    updated_at TIMESTAMP(6) WITH TIME ZONE NOT NULL,
     exchange_rate NUMERIC(18,6) NOT NULL,
     idempotency_key VARCHAR(255),
     receive_amount NUMERIC(18,2) NOT NULL,
