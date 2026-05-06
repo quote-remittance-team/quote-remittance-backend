@@ -11,6 +11,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.math.BigDecimal;
 
+@Async
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -35,7 +36,7 @@ public class RemittanceEventListener {
         payoutService.processPayout(
                 remittance.getId(),
                 remittance.getReceiverBankCode(),
-                remittance.getReceiveAmount().multiply(new BigDecimal(100)).longValue()
+                remittance.getReceiveAmount().multiply(BigDecimal.valueOf(100)).longValue()
         );
     }
 }
