@@ -42,7 +42,7 @@ CREATE TABLE remittances (
     id UUID PRIMARY KEY,
     created_at TIMESTAMP(6) WITH TIME ZONE NOT NULL,
     updated_at TIMESTAMP(6) WITH TIME ZONE NOT NULL,
-    exchange_rate NUMERIC(18,6) NOT NULL,
+    exchange_rate NUMERIC(18,16) NOT NULL,
     idempotency_key VARCHAR(255),
     receive_amount NUMERIC(18,2) NOT NULL,
     receiver_account_number VARCHAR(255) NOT NULL,
