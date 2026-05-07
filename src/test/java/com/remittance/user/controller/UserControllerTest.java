@@ -1,6 +1,8 @@
 package com.remittance.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.remittance.auth.security.JwtAuthenticationFilter;
+import com.remittance.auth.security.JwtService;
 import com.remittance.user.dto.RegisterUserRequest;
 import com.remittance.user.dto.UserResponse;
 import com.remittance.user.service.UserService;
@@ -9,30 +11,41 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+
 import org.springframework.http.MediaType;
+
+import org.springframework.security.test.context.support.WithMockUser;
 
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(
         controllers = UserController.class,
-        excludeAutoConfiguration = SecurityAutoConfiguration.class
+        excludeFilters = {
+                @ComponentScan.Filter(
+                        type = FilterType.ASSIGNABLE_TYPE,
+                        classes = JwtAuthenticationFilter.class
+                )
+        }
 )
-@AutoConfigureMockMvc(addFilters = false)
 class UserControllerTest {
 
     @Autowired
@@ -44,7 +57,11 @@ class UserControllerTest {
     @MockBean
     private UserService userService;
 
+    @MockBean
+    private JwtService jwtService;
+
     @Test
+    @WithMockUser
     void shouldRegisterUserSuccessfully() throws Exception {
 
         UUID userId = UUID.randomUUID();
@@ -64,6 +81,7 @@ class UserControllerTest {
 
         mockMvc.perform(
                         post("/users/register")
+                                .with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request))
                 )
@@ -73,6 +91,7 @@ class UserControllerTest {
     }
 
     @Test
+    @WithMockUser
     void shouldReturnBadRequestForInvalidRequest() throws Exception {
 
         RegisterUserRequest request = RegisterUserRequest.builder()
@@ -82,6 +101,7 @@ class UserControllerTest {
 
         mockMvc.perform(
                         post("/users/register")
+                                .with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request))
                 )
@@ -89,28 +109,28 @@ class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "test@example.com")
     void shouldReturnCurrentUserSuccessfully() throws Exception {
 
-        String email = "test@example.com";
         UUID userId = UUID.randomUUID();
 
         UserResponse response = UserResponse.builder()
                 .id(userId)
-                .email(email)
+                .email("test@example.com")
                 .build();
 
-        when(userService.getUserByEmail(email))
+        when(userService.getUserByEmail("test@example.com"))
                 .thenReturn(response);
 
         mockMvc.perform(
                         get("/users/me")
-                                .param("email", email)
+                                .with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(userId.toString()))
-                .andExpect(jsonPath("$.email").value(email));
+                .andExpect(jsonPath("$.email").value("test@example.com"));
 
-        verify(userService).getUserByEmail(email);
+        verify(userService).getUserByEmail("test@example.com");
     }
 }
