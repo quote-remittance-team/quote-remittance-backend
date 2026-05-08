@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.time.Instant;
 import java.util.Date;
 
 @Service
@@ -37,9 +38,9 @@ public class JwtService {
     public String generateToken(String email) {
         return Jwts.builder()
                 .subject(email)
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                .signWith(signingKey) // ✅ no algorithm needed in 0.12+
+                .issuedAt(Date.from(Instant.now()))
+                .expiration(Date.from(Instant.now().plusMillis(jwtExpiration)))
+                .signWith(signingKey) // no algorithm needed in 0.12+
                 .compact();
     }
 
