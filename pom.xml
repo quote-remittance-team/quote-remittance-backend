@@ -85,6 +85,7 @@
             <scope>test</scope>
         </dependency>
 
+<<<<<<< feature/62-be-integrate-auth-system
         <!-- JWT -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -104,6 +105,16 @@
             <artifactId>jjwt-jackson</artifactId>
             <version>0.12.5</version>
             <scope>runtime</scope>
+=======
+        <!-- Flyway For Database Migration -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+>>>>>>> main
         </dependency>
 
     </dependencies>

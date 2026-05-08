@@ -2,6 +2,7 @@ package com.remittance.deposit.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.remittance.deposit.dto.DepositRequestDto;
+import com.remittance.deposit.dto.DepositResponseDto;
 import com.remittance.deposit.dto.DepositWebhookDto;
 import com.remittance.deposit.entity.Deposit;
 import com.remittance.deposit.service.DepositService;
@@ -25,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import org.springframework.security.test.context.support.WithMockUser;
 
+
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -47,6 +49,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         },
         excludeAutoConfiguration = SecurityAutoConfiguration.class
 )
+
 @AutoConfigureMockMvc(addFilters = false)
 class DepositControllerTest {
 
@@ -71,6 +74,8 @@ class DepositControllerTest {
 
     private Deposit mockDeposit;
 
+    private DepositResponseDto mockDepositResponseDto;
+
     @BeforeEach
     void setUp() {
 
@@ -87,6 +92,16 @@ class DepositControllerTest {
                 "id",
                 UUID.randomUUID()
         );
+      
+        org.springframework.test.util.ReflectionTestUtils.setField(mockDeposit, "id", java.util.UUID.randomUUID());
+
+        mockDepositResponseDto = DepositResponseDto.builder()
+                .id(UUID.randomUUID())
+                .amount(new BigDecimal("100.00"))
+                .currency("USD")
+                .status(DepositStatus.PENDING)
+                .checkoutUrl("https://checkout.paystack.com/fake-url")
+                .build();
     }
 
     @Test
@@ -110,6 +125,18 @@ class DepositControllerTest {
 
         verify(depositService, times(1))
                 .initiateDeposit(any(DepositRequestDto.class));
+      
+        when(depositService.initiateDeposit(any(DepositRequestDto.class), anyString())).thenReturn(mockDepositResponseDto);
+      
+        mockMvc.perform(post("/deposits")
+                .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(mockDepositResponseDto.getId().toString()))
+                .andExpect(jsonPath("$.amount").value(mockDepositResponseDto.getAmount().doubleValue()))
+                .andExpect(jsonPath("$.currency").value(mockDepositResponseDto.getCurrency()))
+                .andExpect(jsonPath("$.status").value(mockDepositResponseDto.getStatus().toString()))
+                .andExpect(jsonPath("$.checkoutUrl").value(mockDepositResponseDto.getCheckoutUrl()));
+        verify(depositService, times(1)).initiateDeposit(any(DepositRequestDto.class), anyString());
     }
 
     @Test
