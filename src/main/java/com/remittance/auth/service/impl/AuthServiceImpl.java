@@ -5,6 +5,7 @@ import com.remittance.auth.service.AuthService;
 import com.remittance.auth.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.*;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,7 +18,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse login(LoginRequest request) {
 
-        authenticationManager.authenticate(
+        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
                         request.getPassword()
@@ -25,7 +26,7 @@ public class AuthServiceImpl implements AuthService {
         );
 
         String token =
-                jwtService.generateToken(request.getEmail());
+                jwtService.generateToken(authentication.getName());
 
         return AuthResponse.builder()
                 .token(token)
