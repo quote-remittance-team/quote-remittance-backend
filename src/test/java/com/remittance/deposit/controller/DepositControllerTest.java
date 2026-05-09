@@ -22,10 +22,9 @@ import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 
 import org.springframework.http.MediaType;
 
-import org.springframework.test.web.servlet.MockMvc;
-
 import org.springframework.security.test.context.support.WithMockUser;
 
+import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -49,7 +48,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         },
         excludeAutoConfiguration = SecurityAutoConfiguration.class
 )
-
 @AutoConfigureMockMvc(addFilters = false)
 class DepositControllerTest {
 
@@ -65,7 +63,6 @@ class DepositControllerTest {
     @MockBean
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
-    // IMPORTANT: Mock JWT beans
     @MockBean
     private com.remittance.auth.security.JwtService jwtService;
 
@@ -79,6 +76,8 @@ class DepositControllerTest {
     @BeforeEach
     void setUp() {
 
+        UUID depositId = UUID.randomUUID();
+
         mockDeposit = Deposit.builder()
                 .amount(BigDecimal.valueOf(100.00))
                 .currency("USD")
@@ -90,13 +89,11 @@ class DepositControllerTest {
         org.springframework.test.util.ReflectionTestUtils.setField(
                 mockDeposit,
                 "id",
-                UUID.randomUUID()
+                depositId
         );
-      
-        org.springframework.test.util.ReflectionTestUtils.setField(mockDeposit, "id", java.util.UUID.randomUUID());
 
         mockDepositResponseDto = DepositResponseDto.builder()
-                .id(UUID.randomUUID())
+                .id(depositId)
                 .amount(new BigDecimal("100.00"))
                 .currency("USD")
                 .status(DepositStatus.PENDING)
@@ -111,8 +108,10 @@ class DepositControllerTest {
         DepositRequestDto requestDto = new DepositRequestDto();
         requestDto.setQuoteId(UUID.randomUUID());
 
-        when(depositService.initiateDeposit(any(DepositRequestDto.class)))
-                .thenReturn(mockDeposit);
+        when(depositService.initiateDeposit(
+                any(DepositRequestDto.class),
+                anyString()
+        )).thenReturn(mockDepositResponseDto);
 
         mockMvc.perform(
                         post("/deposits")
@@ -121,22 +120,18 @@ class DepositControllerTest {
                 )
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id")
-                        .value(mockDeposit.getId().toString()));
+                        .value(mockDepositResponseDto.getId().toString()))
+                .andExpect(jsonPath("$.amount")
+                        .value(mockDepositResponseDto.getAmount().doubleValue()))
+                .andExpect(jsonPath("$.currency")
+                        .value(mockDepositResponseDto.getCurrency()))
+                .andExpect(jsonPath("$.status")
+                        .value(mockDepositResponseDto.getStatus().toString()))
+                .andExpect(jsonPath("$.checkoutUrl")
+                        .value(mockDepositResponseDto.getCheckoutUrl()));
 
         verify(depositService, times(1))
-                .initiateDeposit(any(DepositRequestDto.class));
-      
-        when(depositService.initiateDeposit(any(DepositRequestDto.class), anyString())).thenReturn(mockDepositResponseDto);
-      
-        mockMvc.perform(post("/deposits")
-                .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(requestDto)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(mockDepositResponseDto.getId().toString()))
-                .andExpect(jsonPath("$.amount").value(mockDepositResponseDto.getAmount().doubleValue()))
-                .andExpect(jsonPath("$.currency").value(mockDepositResponseDto.getCurrency()))
-                .andExpect(jsonPath("$.status").value(mockDepositResponseDto.getStatus().toString()))
-                .andExpect(jsonPath("$.checkoutUrl").value(mockDepositResponseDto.getCheckoutUrl()));
-        verify(depositService, times(1)).initiateDeposit(any(DepositRequestDto.class), anyString());
+                .initiateDeposit(any(DepositRequestDto.class), anyString());
     }
 
     @Test
