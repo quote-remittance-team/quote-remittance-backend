@@ -92,6 +92,20 @@ public class RemittanceServiceImpl implements RemittanceService {
                 .build();
     }
 
+    @Override
+    public RemittanceResponse getByReference(String reference) {
+
+        Remittance remittance = remittanceRepository
+                .findByReference(reference)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Remittance not found"
+                        )
+                );
+
+        return mapToResponse(remittance);
+    }
+
     private  String generateReference() {
 
         return "RMT-" + UUID.randomUUID()
@@ -104,6 +118,7 @@ public class RemittanceServiceImpl implements RemittanceService {
     ) {
 
         return RemittanceResponse.builder()
+                .remittanceId(remittance.getId())
                 .reference(remittance.getReference())
                 .status(remittance.getStatus())
                 .sendAmount(remittance.getSendAmount())
