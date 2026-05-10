@@ -3,10 +3,16 @@ package com.remittance.user.controller;
 import com.remittance.user.dto.RegisterUserRequest;
 import com.remittance.user.dto.UserResponse;
 import com.remittance.user.service.UserService;
+
 import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import org.springframework.security.core.Authentication;
+
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,6 +26,7 @@ public class UserController {
     public ResponseEntity<UserResponse> registerUser(
             @Valid @RequestBody RegisterUserRequest request
     ) {
+
         UserResponse response = userService.register(request);
 
         return ResponseEntity
@@ -29,9 +36,12 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getCurrentUser(
-            @RequestParam String email
+            Authentication authentication
     ) {
-        UserResponse response = userService.getUserByEmail(email);
+
+        UserResponse response =
+                userService.getUserByEmail(authentication.getName());
+
         return ResponseEntity.ok(response);
     }
 }

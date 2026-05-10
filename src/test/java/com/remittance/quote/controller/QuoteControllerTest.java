@@ -1,16 +1,31 @@
 package com.remittance.quote.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.remittance.auth.security.JwtAuthenticationFilter;
+import com.remittance.auth.security.JwtService;
 import com.remittance.quote.dto.CreateQuoteRequest;
 import com.remittance.quote.dto.QuoteResponse;
 import com.remittance.quote.service.QuoteService;
+
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+
+import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.test.context.support.WithMockUser;
+
 import org.springframework.test.web.servlet.MockMvc;
+
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
@@ -21,15 +36,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-
-@WebMvcTest(controllers = QuoteController.class)
+@WebMvcTest(QuoteController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class QuoteControllerTest {
 
     @Autowired
@@ -41,7 +56,20 @@ class QuoteControllerTest {
     @MockBean
     private QuoteService quoteService;
 
+    @MockBean
+    private JpaMetamodelMappingContext jpaMetamodelMappingContext;
+
+    @MockBean
+    private JwtService jwtService;
+
+    @MockBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @MockBean
+    UserDetailsService userDetailsService;
+
     @Test
+    @WithMockUser(username = "test@example.com")
     void shouldGenerateQuoteSuccessfully() throws Exception {
 
         UUID quoteId = UUID.randomUUID();
@@ -73,18 +101,22 @@ class QuoteControllerTest {
         mockMvc.perform(
                         post("/quotes")
                                 .with(csrf())
-                                .with(user("test@example.com"))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request))
                 )
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.quoteId").value(quoteId.toString()))
-                .andExpect(jsonPath("$.quoteReference").value("QTE-123456"))
-                .andExpect(jsonPath("$.fromCurrency").value("USD"))
-                .andExpect(jsonPath("$.toCurrency").value("NGN"));
+                .andExpect(jsonPath("$.quoteId")
+                        .value(quoteId.toString()))
+                .andExpect(jsonPath("$.quoteReference")
+                        .value("QTE-123456"))
+                .andExpect(jsonPath("$.fromCurrency")
+                        .value("USD"))
+                .andExpect(jsonPath("$.toCurrency")
+                        .value("NGN"));
     }
 
     @Test
+    @WithMockUser(username = "test@example.com")
     void shouldReturnBadRequestForInvalidQuoteRequest() throws Exception {
 
         CreateQuoteRequest request = CreateQuoteRequest.builder()
@@ -97,13 +129,14 @@ class QuoteControllerTest {
         mockMvc.perform(
                         post("/quotes")
                                 .with(csrf())
-                                .with(user("test@example.com"))
                                 .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
                 )
                 .andExpect(status().isBadRequest());
     }
 
     @Test
+    @WithMockUser(username = "test@example.com")
     void shouldReturnBadRequestWhenCurrenciesAreSame() throws Exception {
 
         UUID userId = UUID.randomUUID();
@@ -125,13 +158,14 @@ class QuoteControllerTest {
         mockMvc.perform(
                         post("/quotes")
                                 .with(csrf())
-                                .with(user("test@example.com"))
                                 .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
                 )
                 .andExpect(status().isBadRequest());
     }
 
     @Test
+    @WithMockUser(username = "test@example.com")
     void shouldReturnQuoteByIdSuccessfully() throws Exception {
 
         UUID quoteId = UUID.randomUUID();
@@ -149,36 +183,44 @@ class QuoteControllerTest {
                 .expiresAt(Instant.now())
                 .build();
 
-        when(quoteService.getQuoteById(quoteId, "test@example.com"))
-                .thenReturn(response);
+        when(quoteService.getQuoteById(
+                quoteId,
+                "test@example.com"
+        )).thenReturn(response);
 
         mockMvc.perform(
                         get("/quotes/{id}", quoteId)
-                                .with(user("test@example.com"))
                 )
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.quoteId").value(quoteId.toString()))
-                .andExpect(jsonPath("$.quoteReference").value("QTE-654321"))
-                .andExpect(jsonPath("$.fromCurrency").value("GBP"))
-                .andExpect(jsonPath("$.toCurrency").value("NGN"));
+                .andExpect(jsonPath("$.quoteId")
+                        .value(quoteId.toString()))
+                .andExpect(jsonPath("$.quoteReference")
+                        .value("QTE-654321"))
+                .andExpect(jsonPath("$.fromCurrency")
+                        .value("GBP"))
+                .andExpect(jsonPath("$.toCurrency")
+                        .value("NGN"));
     }
 
     @Test
+    @WithMockUser(username = "test@example.com")
     void shouldReturnNotFoundWhenQuoteDoesNotExist() throws Exception {
 
         UUID quoteId = UUID.randomUUID();
 
-        when(quoteService.getQuoteById(quoteId, "test@example.com"))
-                .thenThrow(
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Quote not found"
-                        )
-                );
+        when(quoteService.getQuoteById(
+                quoteId,
+                "test@example.com"
+        )).thenThrow(
+                new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Quote not found"
+                )
+        );
 
         mockMvc.perform(
-                get("/quotes/{id}", quoteId)
-                        .with(user("test@example.com"))
-        ).andExpect(status().isNotFound());
+                        get("/quotes/{id}", quoteId)
+                )
+                .andExpect(status().isNotFound());
     }
 }
