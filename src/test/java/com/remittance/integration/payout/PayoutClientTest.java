@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
                         "org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration",
 
                 // Replace with your real Paystack key
-                "paystack.secret.key=sk_test_xxxxxxxxxxxxxxxxx",
+                "paystack.secret.key=${paystack.api.secret}",
 
                 "paystack.base-url=https://api.paystack.co"
         }
