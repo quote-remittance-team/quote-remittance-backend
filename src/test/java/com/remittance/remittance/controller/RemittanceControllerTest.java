@@ -157,12 +157,12 @@ class RemittanceControllerTest {
                         .createdAt(Instant.now())
                         .build();
 
-        when(remittanceService.getByReference(reference))
+        when(remittanceService.getByReference(reference, "test@example.com"))
                 .thenReturn(response);
 
         mockMvc.perform(
                         get("/remittances/{reference}", reference)
-                                .with(user("test@example.com"))
+                                .principal(() -> "test@example.com")
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
@@ -176,6 +176,6 @@ class RemittanceControllerTest {
                 );
 
         verify(remittanceService, times(1))
-                .getByReference(reference);
+                .getByReference(reference, "test@example.com");
     }
 }

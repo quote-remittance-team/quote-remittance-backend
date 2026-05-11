@@ -43,11 +43,13 @@ public class RemittanceController {
 
     @GetMapping("/{reference}")
     public ResponseEntity<RemittanceResponse> getByReference(
-            @PathVariable String reference
+            @PathVariable String reference,
+            Principal principal
     ) {
+        String email = principal.getName();
 
         return ResponseEntity.ok(
-                remittanceService.getByReference(reference)
+                remittanceService.getByReference(reference, "test@example.com")
         );
     }
 }

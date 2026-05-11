@@ -111,7 +111,7 @@ public class RemittanceServiceImpl implements RemittanceService {
     }
 
     @Override
-    public RemittanceResponse getByReference(String reference) {
+    public RemittanceResponse getByReference(String reference, String email) {
 
         Remittance remittance = remittanceRepository
                 .findByReference(reference)
@@ -120,6 +120,15 @@ public class RemittanceServiceImpl implements RemittanceService {
                                 "Remittance not found"
                         )
                 );
+
+        if (!remittance.getSender()
+                .getEmail()
+                .equals(email)
+        ) {
+            throw new SecurityException(
+                    "Unauthorized access to remittance"
+            );
+        }
 
         return mapToResponse(remittance);
     }

@@ -2,6 +2,9 @@ package com.remittance.remittance.service;
 
 import com.remittance.remittance.dto.CreateRemittanceRequest;
 import com.remittance.remittance.dto.RemittanceResponse;
+import com.remittance.remittance.entity.Remittance;
+
+import java.util.Optional;
 
 public interface RemittanceService {
 
@@ -10,6 +13,8 @@ public interface RemittanceService {
             String userEmail
     );
 
-    RemittanceResponse getByReference(String reference);
+    RemittanceResponse getByReference(
+            String reference,
+            String userEmail
+    );
 }
-
