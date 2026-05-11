@@ -20,7 +20,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable()).csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(auth -> auth.requestMatchers("/users/**").permitAll().requestMatchers("/error").permitAll().requestMatchers("/deposits/webhooks").permitAll().anyRequest().authenticated());
+        http.csrf(csrf -> csrf.disable()).csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(auth -> auth.requestMatchers("/users/**").permitAll().requestMatchers("/error").permitAll().requestMatchers("/deposits/webhooks").permitAll().requestMatchers("/api/v1/webhooks/**").permitAll().anyRequest().authenticated());
         return http.build();
     }
 }
