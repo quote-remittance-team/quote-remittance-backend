@@ -116,7 +116,8 @@ public class RemittanceServiceImpl implements RemittanceService {
         Remittance remittance = remittanceRepository
                 .findByReference(reference)
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
                                 "Remittance not found"
                         )
                 );
@@ -125,7 +126,8 @@ public class RemittanceServiceImpl implements RemittanceService {
                 .getEmail()
                 .equals(email)
         ) {
-            throw new SecurityException(
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
                     "Unauthorized access to remittance"
             );
         }
