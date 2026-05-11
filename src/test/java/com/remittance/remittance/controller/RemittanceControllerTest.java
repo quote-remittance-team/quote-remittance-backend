@@ -3,30 +3,28 @@ package com.remittance.remittance.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.remittance.auth.security.JwtAuthenticationFilter;
 import com.remittance.auth.security.JwtService;
+import com.remittance.enums.RemittanceStatus;
 import com.remittance.remittance.dto.CreateRemittanceRequest;
 import com.remittance.remittance.dto.RemittanceResponse;
 import com.remittance.remittance.service.RemittanceService;
-
 import org.junit.jupiter.api.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
-
 import org.springframework.http.MediaType;
-
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
+import java.security.Principal;
 import java.time.Instant;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -84,19 +82,18 @@ class RemittanceControllerTest {
                         .reference("RMT-123ABC")
                         .sendAmount(BigDecimal.valueOf(100))
                         .receiveAmount(BigDecimal.valueOf(150000))
-                        .status(
-                                com.remittance.enums.RemittanceStatus.PROCESSING
-                        )
+                        .status(RemittanceStatus.PROCESSING)
                         .createdAt(Instant.now())
                         .build();
 
         when(remittanceService.createRemittance(
-                any(CreateRemittanceRequest.class)
+                any(CreateRemittanceRequest.class),
+                eq("test@example.com")
         )).thenReturn(response);
 
         mockMvc.perform(
                         post("/remittances")
-                                .with(user("test@example.com"))
+                                .principal(() -> "test@example.com")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(
                                         objectMapper.writeValueAsString(request)
@@ -113,7 +110,10 @@ class RemittanceControllerTest {
                 );
 
         verify(remittanceService, times(1))
-                .createRemittance(any(CreateRemittanceRequest.class));
+                .createRemittance(
+                        any(CreateRemittanceRequest.class),
+                        eq("test@example.com")
+                );
     }
 
     @Test
@@ -138,8 +138,8 @@ class RemittanceControllerTest {
                 )
                 .andExpect(status().isBadRequest());
 
-        verify(remittanceService, times(0))
-                .createRemittance(any(CreateRemittanceRequest.class));
+        verify(remittanceService, never())
+                .createRemittance(any(), any());
     }
 
     @Test
@@ -153,9 +153,7 @@ class RemittanceControllerTest {
                         .reference(reference)
                         .sendAmount(BigDecimal.valueOf(100))
                         .receiveAmount(BigDecimal.valueOf(150000))
-                        .status(
-                                com.remittance.enums.RemittanceStatus.PROCESSING
-                        )
+                        .status(RemittanceStatus.PROCESSING)
                         .createdAt(Instant.now())
                         .build();
 

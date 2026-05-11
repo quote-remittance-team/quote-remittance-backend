@@ -13,17 +13,20 @@ import com.remittance.remittance.event.RemittanceCreatedEvent;
 import com.remittance.remittance.repository.RemittanceRepository;
 import com.remittance.remittance.service.impl.RemittanceServiceImpl;
 import com.remittance.user.entity.User;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
-
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -46,6 +49,8 @@ class RemittanceServiceTest {
     @InjectMocks
     private RemittanceServiceImpl remittanceService;
 
+    private static final String EMAIL = "test@example.com";
+
     @Test
     void shouldCreateRemittanceSuccessfully() {
 
@@ -60,7 +65,9 @@ class RemittanceServiceTest {
                         "idem-key-123"
                 );
 
-        User user = User.builder().build();
+        User user = User.builder()
+                .email(EMAIL)
+                .build();
 
         Quote quote = Quote.builder()
                 .quoteReference("QTE-123456")
@@ -81,11 +88,7 @@ class RemittanceServiceTest {
                 .idempotencyKey("deposit-idem")
                 .build();
 
-        ReflectionTestUtils.setField(
-                deposit,
-                "id",
-                depositId
-        );
+        ReflectionTestUtils.setField(deposit, "id", depositId);
 
         Remittance savedRemittance = Remittance.builder()
                 .reference("RMT-123456")
@@ -121,7 +124,7 @@ class RemittanceServiceTest {
                 .thenReturn(savedRemittance);
 
         RemittanceResponse response =
-                remittanceService.createRemittance(request);
+                remittanceService.createRemittance(request, EMAIL);
 
         assertNotNull(response);
 
@@ -175,7 +178,10 @@ class RemittanceServiceTest {
         IllegalArgumentException exception =
                 assertThrows(
                         IllegalArgumentException.class,
-                        () -> remittanceService.createRemittance(request)
+                        () -> remittanceService.createRemittance(
+                                request,
+                                EMAIL
+                        )
                 );
 
         assertEquals(
@@ -204,7 +210,16 @@ class RemittanceServiceTest {
                         "idem-key-123"
                 );
 
+        User user = User.builder()
+                .email(EMAIL)
+                .build();
+
+        Quote quote = Quote.builder()
+                .user(user)
+                .build();
+
         Deposit deposit = Deposit.builder()
+                .quote(quote)
                 .status(DepositStatus.PENDING)
                 .build();
 
@@ -220,7 +235,10 @@ class RemittanceServiceTest {
         IllegalStateException exception =
                 assertThrows(
                         IllegalStateException.class,
-                        () -> remittanceService.createRemittance(request)
+                        () -> remittanceService.createRemittance(
+                                request,
+                                EMAIL
+                        )
                 );
 
         assertEquals(
@@ -249,7 +267,16 @@ class RemittanceServiceTest {
                         "idem-key-123"
                 );
 
+        User user = User.builder()
+                .email(EMAIL)
+                .build();
+
+        Quote quote = Quote.builder()
+                .user(user)
+                .build();
+
         Deposit deposit = Deposit.builder()
+                .quote(quote)
                 .status(DepositStatus.CONFIRMED)
                 .build();
 
@@ -271,7 +298,10 @@ class RemittanceServiceTest {
         IllegalStateException exception =
                 assertThrows(
                         IllegalStateException.class,
-                        () -> remittanceService.createRemittance(request)
+                        () -> remittanceService.createRemittance(
+                                request,
+                                EMAIL
+                        )
                 );
 
         assertEquals(
@@ -300,7 +330,9 @@ class RemittanceServiceTest {
                         "idem-key-123"
                 );
 
-        User user = User.builder().build();
+        User user = User.builder()
+                .email(EMAIL)
+                .build();
 
         Quote quote = Quote.builder()
                 .quoteReference("QTE-123456")
@@ -359,7 +391,7 @@ class RemittanceServiceTest {
                 .thenReturn(Optional.of(existingRemittance));
 
         RemittanceResponse response =
-                remittanceService.createRemittance(request);
+                remittanceService.createRemittance(request, EMAIL);
 
         assertNotNull(response);
 

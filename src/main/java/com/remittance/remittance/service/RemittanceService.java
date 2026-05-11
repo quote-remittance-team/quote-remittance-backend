@@ -5,7 +5,10 @@ import com.remittance.remittance.dto.RemittanceResponse;
 
 public interface RemittanceService {
 
-    RemittanceResponse createRemittance(CreateRemittanceRequest request);
+    RemittanceResponse createRemittance(
+            CreateRemittanceRequest request,
+            String userEmail
+    );
 
     RemittanceResponse getByReference(String reference);
 }

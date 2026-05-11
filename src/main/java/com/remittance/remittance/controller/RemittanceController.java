@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
 @RestController
 @RequestMapping("/remittances")
 @RequiredArgsConstructor
@@ -25,11 +27,14 @@ public class RemittanceController {
      */
     @PostMapping
     public ResponseEntity<RemittanceResponse> createRemittance(
-            @Valid @RequestBody CreateRemittanceRequest request
-    ) {
+            @Valid @RequestBody CreateRemittanceRequest request,
+            Principal principal
+            ) {
+
+        String email = principal.getName();
 
         RemittanceResponse response =
-                remittanceService.createRemittance(request);
+                remittanceService.createRemittance(request, email);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
