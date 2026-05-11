@@ -14,7 +14,9 @@ import com.remittance.remittance.service.RemittanceService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -30,11 +32,27 @@ public class RemittanceServiceImpl implements RemittanceService {
     @Override
     @Transactional
     public RemittanceResponse createRemittance(
-            CreateRemittanceRequest request
+            CreateRemittanceRequest request,
+            String userEmail
     ) {
 
         Deposit deposit = depositRepository.findById(request.getDepositId())
                 .orElseThrow(() -> new IllegalArgumentException("Deposit not found"));
+
+        /*
+         * SECURITY CHECK
+         * Prevent IDOR attacks
+         *  */
+        if (!deposit.getQuote()
+                .getUser()
+                .getEmail()
+                .equals(userEmail)
+        ) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Unauthorized access to deposit"
+            );
+        }
 
         if (deposit.getStatus() != DepositStatus.CONFIRMED) {
 
@@ -92,6 +110,31 @@ public class RemittanceServiceImpl implements RemittanceService {
                 .build();
     }
 
+    @Override
+    public RemittanceResponse getByReference(String reference, String email) {
+
+        Remittance remittance = remittanceRepository
+                .findByReference(reference)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Remittance not found"
+                        )
+                );
+
+        if (!remittance.getSender()
+                .getEmail()
+                .equals(email)
+        ) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Unauthorized access to remittance"
+            );
+        }
+
+        return mapToResponse(remittance);
+    }
+
     private  String generateReference() {
 
         return "RMT-" + UUID.randomUUID()
@@ -104,6 +147,7 @@ public class RemittanceServiceImpl implements RemittanceService {
     ) {
 
         return RemittanceResponse.builder()
+                .remittanceId(remittance.getId())
                 .reference(remittance.getReference())
                 .status(remittance.getStatus())
                 .sendAmount(remittance.getSendAmount())
