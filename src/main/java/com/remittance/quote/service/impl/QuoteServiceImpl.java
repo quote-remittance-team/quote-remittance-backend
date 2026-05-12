@@ -2,6 +2,7 @@ package com.remittance.quote.service.impl;
 
 import com.remittance.common.util.CurrencyValidator;
 import com.remittance.enums.QuoteStatus;
+import com.remittance.integration.exchange.ExchangeRateClient;
 import com.remittance.quote.dto.CreateQuoteRequest;
 import com.remittance.quote.dto.QuoteResponse;
 import com.remittance.quote.entity.Quote;
@@ -28,6 +29,7 @@ public class QuoteServiceImpl implements QuoteService {
 
     private final QuoteRepository quoteRepository;
     private final UserRepository userRepository;
+    private final ExchangeRateClient exchangeRateClient;
 
     @Value("${quote.expiry-minutes}")
     private long quoteExpiryMinutes;
@@ -53,10 +55,11 @@ public class QuoteServiceImpl implements QuoteService {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        BigDecimal exchangeRate = fetchExchangeRate(
-                request.getFromCurrency(),
-                request.getToCurrency()
-        );
+        BigDecimal exchangeRate =
+                exchangeRateClient.getExchangeRate(
+                        fromCurrency,
+                        toCurrency
+                );
 
         BigDecimal fee = calculateFee(request.getSendAmount());
 
@@ -99,28 +102,7 @@ public class QuoteServiceImpl implements QuoteService {
         return mapToResponse(quote);
     }
 
-    /**
-     * Temporary mock exchange rate logic.
-     * External FX provider integration comes later.
-     */
-    private BigDecimal fetchExchangeRate(
-            String fromCurrency,
-            String toCurrency
-    ) {
-        if (fromCurrency.equalsIgnoreCase("USD")
-                && toCurrency.equalsIgnoreCase("NGN")) {
 
-            return BigDecimal.valueOf(1600);
-        }
-
-        if (fromCurrency.equalsIgnoreCase("GBP")
-                && toCurrency.equalsIgnoreCase("NGN")) {
-
-            return BigDecimal.valueOf(2100);
-        }
-
-        return BigDecimal.ONE;
-    }
 
     private BigDecimal calculateFee(BigDecimal amount) {
 
