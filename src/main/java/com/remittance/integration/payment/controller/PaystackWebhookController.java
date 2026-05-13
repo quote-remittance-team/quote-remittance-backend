@@ -17,7 +17,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 
 @RestController
-@RequestMapping("/api/v1/webhooks/paystack")
+@RequestMapping("/webhooks/paystack")
 @RequiredArgsConstructor
 @Slf4j
 public class PaystackWebhookController {
