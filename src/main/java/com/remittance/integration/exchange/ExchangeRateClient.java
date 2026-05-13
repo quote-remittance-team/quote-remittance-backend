@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -82,7 +83,7 @@ public class ExchangeRateClient {
 
             return rate;
 
-        } catch (Exception ex) {
+        } catch (RestClientException ex) {
 
             log.error(
                     "Exchange rate provider failed",
