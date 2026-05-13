@@ -58,7 +58,7 @@ public class ExchangeRateClient {
 
                 throw new ResponseStatusException(
                         HttpStatus.BAD_GATEWAY,
-                        "Failed to fetch exchange rates"
+                        "Exchange rate provider unavailable"
                 );
             }
 
