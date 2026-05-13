@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.math.BigDecimal;
 
@@ -34,12 +35,14 @@ public class ExchangeRateClient {
             String toCurrency
     ) {
 
-        String url = String.format(
-                "%s/%s/latest/%s",
-                apiUrl,
-                apiKey,
-                fromCurrency
-        );
+        String url = UriComponentsBuilder
+                .fromHttpUrl(apiUrl)
+                .pathSegment(
+                        apiKey,
+                        "latest",
+                        fromCurrency
+                )
+                .toUriString();
 
         try {
 
