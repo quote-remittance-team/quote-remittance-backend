@@ -1,5 +1,6 @@
 package com.remittance.quote.service;
 
+import com.remittance.integration.exchange.ExchangeRateClient;
 import com.remittance.quote.dto.CreateQuoteRequest;
 import com.remittance.quote.dto.QuoteResponse;
 import com.remittance.quote.entity.Quote;
@@ -31,6 +32,9 @@ class QuoteServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private ExchangeRateClient exchangeRateClient;
+
     @InjectMocks
     private QuoteServiceImpl quoteService;
 
@@ -59,6 +63,9 @@ class QuoteServiceTest {
 
         when(quoteRepository.save(any(Quote.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
+
+        when(exchangeRateClient.getExchangeRate("USD", "NGN"))
+                .thenReturn(BigDecimal.valueOf(1600));
 
         QuoteResponse response = quoteService.generateQuote(request);
 
