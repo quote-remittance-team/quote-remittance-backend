@@ -2,6 +2,7 @@ package com.remittance.common.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -33,20 +34,37 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationErrors(
+    public ResponseEntity<Map<String, Object>> handleValidationErrors(
             MethodArgumentNotValidException ex
     ) {
 
-        Map<String, String> errors = new HashMap<>();
+        Map<String, String> validationErrors = new HashMap<>();
 
         ex.getBindingResult()
-                .getFieldErrors()
-                .forEach(error ->
-                        errors.put(error.getField(), error.getDefaultMessage())
-                );
+                .getAllErrors()
+                .forEach(error -> {
+
+                    String name;
+
+                    if (error instanceof FieldError fieldError) {
+                        name = fieldError.getField();
+                    } else {
+                        name = error.getObjectName();
+                    }
+
+                    String message = error.getDefaultMessage() != null
+                            ? error.getDefaultMessage()
+                            : "Invalid value";
+
+                    validationErrors.putIfAbsent(name, message);
+                });
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Validation failed");
+        response.put("errors", validationErrors);
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(errors);
+                .body(response);
     }
 }
