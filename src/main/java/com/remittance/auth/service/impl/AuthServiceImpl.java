@@ -31,9 +31,8 @@ public class AuthServiceImpl implements AuthService {
         String token =
                 jwtService.generateToken(authentication.getName());
 
-                User user = userRepository.findByEmailIgnoreCase(request.getEmail())
-                        .orElseThrow(() -> new
-                RuntimeException("User not found"));
+        User user = userRepository.findByEmailIgnoreCase(authentication.getName())
+                .orElseThrow(() -> new IllegalStateException("Authenticated user not found"));
 
         return AuthResponse.builder()
                 .token(token)
