@@ -3,6 +3,8 @@ package com.remittance.auth.service.impl;
 import com.remittance.auth.dto.*;
 import com.remittance.auth.service.AuthService;
 import com.remittance.auth.security.JwtService;
+import com.remittance.user.entity.User;
+import com.remittance.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
@@ -14,6 +16,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final UserRepository userRepository;
 
     @Override
     public AuthResponse login(LoginRequest request) {
@@ -28,8 +31,13 @@ public class AuthServiceImpl implements AuthService {
         String token =
                 jwtService.generateToken(authentication.getName());
 
+                User user = userRepository.findByEmailIgnoreCase(request.getEmail())
+                        .orElseThrow(() -> new
+                RuntimeException("User not found"));
+
         return AuthResponse.builder()
                 .token(token)
+                .userId(user.getId())
                 .build();
     }
 }
