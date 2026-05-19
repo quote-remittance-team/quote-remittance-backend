@@ -1,0 +1,1 @@
+ALTER TABLE quotes ALTER COLUMN exchange_rate TYPE NUMERIC(19,6);

@@ -39,7 +39,7 @@ public class Quote extends BaseEntity {
     @Column(name = "to_currency", nullable = false)
     private String toCurrency;
 
-    @Column(name = "exchange_rate", nullable = false, precision = 18, scale = 6, updatable = false)
+    @Column(name = "exchange_rate", nullable = false, precision = 19, scale = 6, updatable = false)
     private BigDecimal exchangeRate;
 
     @Column(name = "fee", nullable = false, precision = 18, scale = 2)
