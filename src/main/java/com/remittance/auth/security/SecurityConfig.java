@@ -42,8 +42,17 @@ public class SecurityConfig {
                         )
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/users/register").permitAll()
-                        .requestMatchers("/webhooks", "/webhooks/**").permitAll()
+                        .requestMatchers(
+                                "/",
+                                "/auth/**",
+                                "/users/register",
+                                "/actuator/health",
+                                "/actuator/info"
+                        ).permitAll()
+                        .requestMatchers(
+                                "/webhooks",
+                                "/webhooks/**"
+                        ).permitAll()
                         .anyRequest()
                         .authenticated()
                 )
