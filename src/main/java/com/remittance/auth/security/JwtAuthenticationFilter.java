@@ -44,7 +44,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         jwt = authHeader.substring(BEARER_PREFIX.length());
 
-       // userEmail = jwtService.extractEmail(jwt);
         try {
             userEmail = jwtService.extractEmail(jwt);
         } catch (io.jsonwebtoken.ExpiredJwtException e) {
