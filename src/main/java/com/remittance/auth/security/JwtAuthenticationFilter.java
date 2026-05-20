@@ -33,7 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
-        final String userEmail;
+        String userEmail = null;
 
         if (authHeader == null
                 || !authHeader.startsWith(BEARER_PREFIX)) {
@@ -44,7 +44,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         jwt = authHeader.substring(BEARER_PREFIX.length());
 
-        userEmail = jwtService.extractEmail(jwt);
+       // userEmail = jwtService.extractEmail(jwt);
+        try {
+            userEmail = jwtService.extractEmail(jwt);
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            System.out.println("JWT expired, Passing request as Unauthenticated");
+        }
 
         if (userEmail != null
                 && SecurityContextHolder.getContext()
