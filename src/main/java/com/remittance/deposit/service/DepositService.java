@@ -30,18 +30,14 @@ public class DepositService {
     public DepositResponseDto initiateDeposit(DepositRequestDto request, String customerEmail) {
         Quote quote = quoteRepository.findById(request.getQuoteId()).orElseThrow(() -> new IllegalArgumentException("Quote not found"));
         String currency = quote.getFromCurrency();
-        BigDecimal amountInNaira = quote.getFromCurrency().equalsIgnoreCase("NGN")
+        BigDecimal amountInNaira = currency.equalsIgnoreCase("NGN")
                 ? quote.getTotalPayable()
                 :quote.getTotalPayable().multiply(quote.getExchangeRate());
         String amountInSubunits = amountInNaira
                 .multiply(BigDecimal.valueOf(100))
+                .setScale(0, java.math.RoundingMode.HALF_UP)
                 .toBigInteger()
                 .toString();
-        //BigDecimal multiplier = getCurrencyMultiplier(currency);
-        //String amountInSubunits = quote.getTotalPayable()
-          //      .multiply(multiplier)
-           //     .toBigInteger()
-            //    .toString();
 
         //Generate a unique tracking reference
         String paymentReference = UUID.randomUUID().toString();
