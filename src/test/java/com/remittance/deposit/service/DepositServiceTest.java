@@ -73,7 +73,7 @@ class DepositServiceTest {
         PaystackInitializeResponseDto.PaystackData mockPaystackData = new PaystackInitializeResponseDto.PaystackData();
         mockPaystackResponse.setStatus(true);
         mockPaystackData.setReference("PAY-12345");
-        mockPaystackData.setAuthorizationUrl("htps://checkout.paystack.com/fake-url");
+        mockPaystackData.setAuthorizationUrl("https://checkout.paystack.com/fake-url");
         mockPaystackResponse.setData(mockPaystackData);
         when(paymentClient.initializeTransaction(any(PaystackInitializeRequestDto.class))).thenReturn(mockPaystackResponse);
 
