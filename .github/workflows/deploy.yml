@@ -1,0 +1,27 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Build
+        run: ./mvnw clean test package
+
+      - name: Trigger Render Deploy
+        run: curl ${{ secrets.RENDER_DEPLOY_HOOK }}
+        
