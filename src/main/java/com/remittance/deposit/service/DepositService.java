@@ -36,8 +36,7 @@ public class DepositService {
         String amountInSubunits = amountInNaira
                 .multiply(BigDecimal.valueOf(100))
                 .setScale(0, java.math.RoundingMode.HALF_UP)
-                .toBigInteger()
-                .toString();
+                .toBigInteger().toString();
 
         //Generate a unique tracking reference
         String paymentReference = UUID.randomUUID().toString();
