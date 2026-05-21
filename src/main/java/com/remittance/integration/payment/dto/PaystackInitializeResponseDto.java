@@ -14,8 +14,8 @@ public class PaystackInitializeResponseDto {
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class PaystackData {
-        @JsonProperty("authorisation_url")
-        private String authorisationUrl;
+        @JsonProperty("authorization_url")
+        private String authorizationUrl;
 
         @JsonProperty("access_code")
         private String accessCode;
