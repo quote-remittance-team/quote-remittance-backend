@@ -66,13 +66,14 @@ class DepositServiceTest {
         DepositRequestDto requestDto = new DepositRequestDto();
         requestDto.setQuoteId(UUID.randomUUID());
         requestDto.setIdempotencyKey(IDEMPOTENCY_KEY);
+        mockQuote.setExchangeRate(new BigDecimal("100.00"));
         when(quoteRepository.findById(requestDto.getQuoteId())).thenReturn(Optional.of(mockQuote));
 
         PaystackInitializeResponseDto mockPaystackResponse = new PaystackInitializeResponseDto();
         PaystackInitializeResponseDto.PaystackData mockPaystackData = new PaystackInitializeResponseDto.PaystackData();
         mockPaystackResponse.setStatus(true);
         mockPaystackData.setReference("PAY-12345");
-        mockPaystackData.setAuthorisationUrl("hhtps://checkout.paystack.com/fake-url");
+        mockPaystackData.setAuthorizationUrl("hhtps://checkout.paystack.com/fake-url");
         mockPaystackResponse.setData(mockPaystackData);
         when(paymentClient.initializeTransaction(any(PaystackInitializeRequestDto.class))).thenReturn(mockPaystackResponse);
 

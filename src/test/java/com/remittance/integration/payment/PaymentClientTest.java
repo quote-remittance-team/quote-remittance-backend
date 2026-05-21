@@ -38,7 +38,7 @@ public class PaymentClientTest {
         expectedResponse.setStatus(true);
         expectedResponse.setMessage("Authorization URL created");
         PaystackInitializeResponseDto.PaystackData data = new PaystackInitializeResponseDto.PaystackData();
-        data.setAuthorisationUrl("https://checkout.paystack.com/fake-url");
+        data.setAuthorizationUrl("https://checkout.paystack.com/fake-url");
         data.setReference("REF-123");
         data.setAccessCode("ACCESS_123");
         expectedResponse.setData(data);
@@ -47,7 +47,7 @@ public class PaymentClientTest {
         PaystackInitializeResponseDto actualResponse = paymentClient.initializeTransaction(requestDto);
         assertNotNull(actualResponse);
         assertTrue(actualResponse.isStatus());
-        assertEquals("https://checkout.paystack.com/fake-url", actualResponse.getData().getAuthorisationUrl());
+        assertEquals("https://checkout.paystack.com/fake-url", actualResponse.getData().getAuthorizationUrl());
         assertEquals("REF-123", actualResponse.getData().getReference());
     }
 

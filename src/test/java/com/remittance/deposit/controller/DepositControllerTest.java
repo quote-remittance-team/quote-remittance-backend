@@ -107,6 +107,7 @@ class DepositControllerTest {
 
         DepositRequestDto requestDto = new DepositRequestDto();
         requestDto.setQuoteId(UUID.randomUUID());
+        requestDto.setIdempotencyKey(UUID.randomUUID().toString());
 
         when(depositService.initiateDeposit(
                 any(DepositRequestDto.class),

@@ -15,4 +15,5 @@ public class DepositResponseDto {
     private BigDecimal amount;
     private String currency;
     private String checkoutUrl;
+    private String paymentReference;
 }
