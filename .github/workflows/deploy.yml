@@ -9,6 +9,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    env:
+      PAYSTACK_API_SECRET: ${{ secrets.PAYSTACK_API_SECRET }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,4 +27,3 @@ jobs:
 
       - name: Trigger Render Deploy
         run: curl ${{ secrets.RENDER_DEPLOY_HOOK }}
-        
