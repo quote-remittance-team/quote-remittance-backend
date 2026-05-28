@@ -34,13 +34,6 @@ public class SecurityConfig {
                         )
                 )
                 .authorizeHttpRequests(auth -> auth
-
-                        // Allow preflight requests
-                        .requestMatchers(
-                                HttpMethod.OPTIONS,
-                                "/**"
-                        ).permitAll()
-
                         // Public routes
                         .requestMatchers(
                                 "/",
