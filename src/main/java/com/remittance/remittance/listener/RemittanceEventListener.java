@@ -11,14 +11,14 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.math.BigDecimal;
 
-@Async
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class RemittanceEventListener {
 
     private final PayoutService payoutService;
-
+    @Async
     @TransactionalEventListener(
             phase = TransactionPhase.AFTER_COMMIT
     )
@@ -26,17 +26,20 @@ public class RemittanceEventListener {
             RemittanceCreatedEvent event
     ) {
 
-        log.info(
-                "Transaction committed. Triggering payout for remittance {}",
-                event.getRemittance().getReference()
-        );
-
         var remittance = event.getRemittance();
 
-        payoutService.processPayout(
-                remittance.getId(),
-                remittance.getReceiverBankCode(),
-                remittance.getReceiveAmount().multiply(BigDecimal.valueOf(100)).longValue()
+        log.info(
+                "Transaction committed. Creating payout for remittance {}",
+                remittance.getReference()
         );
+
+        payoutService.createPayout(remittance);
+
+        log.info(
+                "Payout created in PENDING state for remittance {}",
+                remittance.getId()
+        );
+
+
     }
 }

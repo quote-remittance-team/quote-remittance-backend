@@ -98,4 +98,10 @@ public class DepositService {
             default -> BigDecimal.valueOf(100);
         };
     }
+
+    public Deposit getByPaymentReference(String paymentReference) {
+        return depositRepository.findByPaymentReference(paymentReference)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Deposit not found: " + paymentReference));
+    }
 }

@@ -56,14 +56,16 @@ public class RemittanceServiceImpl implements RemittanceService {
 
         if (deposit.getStatus() != DepositStatus.CONFIRMED) {
 
-            throw new IllegalStateException(
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
                     "Deposit must be confirmed before remittance"
             );
         }
 
         remittanceRepository.findByDepositId(deposit.getId())
                 .ifPresent(existing -> {
-                    throw new IllegalStateException(
+                    throw new ResponseStatusException(
+                            HttpStatus.CONFLICT,
                             "Remittance already exists for deposit"
                     );
                 });
