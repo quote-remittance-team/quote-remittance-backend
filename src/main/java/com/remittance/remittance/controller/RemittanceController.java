@@ -21,7 +21,6 @@ import java.security.Principal;
 @RestController
 @RequestMapping("/remittances")
 @RequiredArgsConstructor
-
 public class RemittanceController {
 
     private final RemittanceService remittanceService;
