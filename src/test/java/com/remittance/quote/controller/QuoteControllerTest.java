@@ -3,6 +3,7 @@ package com.remittance.quote.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.remittance.auth.security.JwtAuthenticationFilter;
 import com.remittance.auth.security.JwtService;
+import com.remittance.common.exception.GlobalExceptionHandler;
 import com.remittance.quote.dto.CreateQuoteRequest;
 import com.remittance.quote.dto.QuoteResponse;
 import com.remittance.quote.service.QuoteService;
@@ -16,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 
 import org.springframework.http.HttpStatus;
@@ -44,6 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(QuoteController.class)
+@Import(GlobalExceptionHandler.class)
 class QuoteControllerTest {
 
     @Autowired
