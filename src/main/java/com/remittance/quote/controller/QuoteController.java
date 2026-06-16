@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -36,10 +37,15 @@ public class QuoteController {
             org.springframework.security.core.Authentication authentication
     ) {
 
-        // 🔥 FIX: prevent null crash in tests
-        String email = (authentication != null)
-                ? authentication.getName()
-                : "test@example.com";
+
+        if (authentication == null || !authentication.isAuthenticated()){
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "User is not authenticated"
+            );
+        }
+
+        String email = authentication.getName();
 
         QuoteResponse response =
                 quoteService.getQuoteById(id, email);
