@@ -38,6 +38,16 @@ public class QuoteController {
     ) {
 
 
+        if (authentication == null ||
+                !authentication.isAuthenticated() ||
+                authentication instanceof org.springframework.security.authentication.AnonymousAuthenticationToken) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "User is not authenticated"
+            );
+        }
+
         String email = authentication.getName();
 
         QuoteResponse response =
