@@ -97,4 +97,25 @@ class QuoteServiceTest {
                 exception.getMessage()
         );
     }
+
+
+    @Test
+    void shouldThrowExceptionForUnsupportedCurrency() {
+        CreateQuoteRequest request = new CreateQuoteRequest(
+                BigDecimal.valueOf(100),
+                "ABC", // Invalid currency code
+                "NGN"
+        );
+
+        // Mocking behavior assuming your service checks currency support before database lookups
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> quoteService.generateQuote(request, mockEmail)
+        );
+
+        assertEquals(
+                "Unsupported currency",
+                exception.getMessage()
+        );
+    }
 }

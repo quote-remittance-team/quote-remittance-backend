@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 
 import java.util.UUID;
 
@@ -21,7 +23,7 @@ public class QuoteController {
 
     @PostMapping
     public ResponseEntity<QuoteResponse> createQuote(
-            @Valid @RequestBody CreateQuoteRequest request, org.springframework.security.core.Authentication authentication
+            @Valid @RequestBody CreateQuoteRequest request, Authentication authentication
     ) {
 
         if (authentication == null ||
@@ -46,7 +48,7 @@ public class QuoteController {
     @GetMapping("/{id}")
     public ResponseEntity<QuoteResponse> getQuoteById(
             @PathVariable UUID id,
-            org.springframework.security.core.Authentication authentication
+            Authentication authentication
     ) {
 
 
