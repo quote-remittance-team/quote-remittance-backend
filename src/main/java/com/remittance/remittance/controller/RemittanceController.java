@@ -54,7 +54,7 @@ public class RemittanceController {
         String email = principal.getName();
 
         return ResponseEntity.ok(
-                remittanceService.getByReference(reference, "test@example.com")
+                remittanceService.getByReference(reference, email)
         );
     }
 }
