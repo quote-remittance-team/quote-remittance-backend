@@ -21,10 +21,22 @@ public class QuoteController {
 
     @PostMapping
     public ResponseEntity<QuoteResponse> createQuote(
-            @Valid @RequestBody CreateQuoteRequest request
+            @Valid @RequestBody CreateQuoteRequest request, org.springframework.security.core.Authentication authentication
     ) {
 
-        QuoteResponse response = quoteService.generateQuote(request);
+        if (authentication == null ||
+                !authentication.isAuthenticated() ||
+                authentication instanceof org.springframework.security.authentication.AnonymousAuthenticationToken) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "User is not authenticated"
+            );
+        }
+
+        String email = authentication.getName();
+
+        QuoteResponse response = quoteService.generateQuote(request, email);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

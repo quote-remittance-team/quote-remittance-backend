@@ -29,6 +29,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -36,10 +37,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @WebMvcTest(QuoteController.class)
-@AutoConfigureMockMvc // FILTERS ARE ON SO ANONYMOUS CHECKS WORK
+@AutoConfigureMockMvc
 class QuoteControllerTest {
 
     @Autowired
@@ -58,14 +58,13 @@ class QuoteControllerTest {
     private JwtService jwtService;
 
     @MockBean
-    private JwtAuthenticationFilter jwtAuthenticationFilter; // Your custom filter mock
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @MockBean
     private UserDetailsService userDetailsService;
 
     @BeforeEach
     void setUpSecurityFilterBypass() throws Exception {
-        // Tells your mocked JwtFilter to stop blocking requests and just pass them along!
         doAnswer(invocation -> {
             HttpServletRequest request = invocation.getArgument(0);
             HttpServletResponse response = invocation.getArgument(1);
@@ -79,10 +78,8 @@ class QuoteControllerTest {
     @WithMockUser(username = "test@example.com")
     void shouldGenerateQuoteSuccessfully() throws Exception {
         UUID quoteId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
 
         CreateQuoteRequest request = CreateQuoteRequest.builder()
-                .userId(userId)
                 .sendAmount(BigDecimal.valueOf(100))
                 .fromCurrency("USD")
                 .toCurrency("NGN")
@@ -101,12 +98,12 @@ class QuoteControllerTest {
                 .expiresAt(Instant.now())
                 .build();
 
-        when(quoteService.generateQuote(any(CreateQuoteRequest.class)))
+        when(quoteService.generateQuote(any(CreateQuoteRequest.class), eq("test@example.com")))
                 .thenReturn(response);
 
         mockMvc.perform(
                         post("/quotes")
-                                .with(csrf()) // Keeps CSRF configuration satisfied
+                                .with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request))
                 )
@@ -118,7 +115,6 @@ class QuoteControllerTest {
     @WithMockUser(username = "test@example.com")
     void shouldReturnBadRequestForInvalidQuoteRequest() throws Exception {
         CreateQuoteRequest request = CreateQuoteRequest.builder()
-                .userId(null)
                 .sendAmount(null)
                 .fromCurrency("NGN")
                 .toCurrency("ABC")
@@ -136,16 +132,13 @@ class QuoteControllerTest {
     @Test
     @WithMockUser(username = "test@example.com")
     void shouldReturnBadRequestWhenCurrenciesAreSame() throws Exception {
-        UUID userId = UUID.randomUUID();
-
         CreateQuoteRequest request = CreateQuoteRequest.builder()
-                .userId(userId)
                 .sendAmount(BigDecimal.valueOf(100))
                 .fromCurrency("USD")
                 .toCurrency("USD")
                 .build();
 
-        when(quoteService.generateQuote(any(CreateQuoteRequest.class)))
+        when(quoteService.generateQuote(any(CreateQuoteRequest.class), eq("test@example.com")))
                 .thenThrow(new IllegalArgumentException("Source and destination currencies cannot be the same"));
 
         mockMvc.perform(
@@ -158,7 +151,7 @@ class QuoteControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "test@example.com") // Forces a real UsernamePasswordAuthenticationToken (Not anonymous!)
+    @WithMockUser(username = "test@example.com")
     void shouldReturnQuoteByIdSuccessfully() throws Exception {
         UUID quoteId = UUID.randomUUID();
 
