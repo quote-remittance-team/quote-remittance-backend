@@ -15,8 +15,6 @@ import java.util.UUID;
 @Builder
 public class CreateQuoteRequest {
 
-    @NotNull(message = "User ID is required")
-    private UUID userId;
 
     @NotNull(message = "Send amount is required")
     @DecimalMin(value = "0.01", message = "Amount must be greater than zero")

@@ -18,7 +18,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -38,6 +37,9 @@ class QuoteServiceTest {
     @InjectMocks
     private QuoteServiceImpl quoteService;
 
+    // ✅ Define a reusable mock email for your security context lookup
+    private final String mockEmail = "testuser@example.com";
+
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(quoteService, "feePercentage", BigDecimal.valueOf(0.01));
@@ -47,10 +49,7 @@ class QuoteServiceTest {
     @Test
     void shouldGenerateQuoteSuccessfully() {
 
-        UUID userId = UUID.randomUUID();
-
         CreateQuoteRequest request = new CreateQuoteRequest(
-                userId,
                 BigDecimal.valueOf(100),
                 "USD",
                 "NGN"
@@ -58,7 +57,8 @@ class QuoteServiceTest {
 
         User user = User.builder().build();
 
-        when(userRepository.findById(userId))
+        // ✅ FIXED: Mocking findByEmailIgnoreCase instead of the old findById lookup
+        when(userRepository.findByEmailIgnoreCase(mockEmail))
                 .thenReturn(Optional.of(user));
 
         when(quoteRepository.save(any(Quote.class)))
@@ -67,7 +67,8 @@ class QuoteServiceTest {
         when(exchangeRateClient.getExchangeRate("USD", "NGN"))
                 .thenReturn(BigDecimal.valueOf(1600));
 
-        QuoteResponse response = quoteService.generateQuote(request);
+        // ✅ FIXED: Passing BOTH the request payload and the secure user email string
+        QuoteResponse response = quoteService.generateQuote(request, mockEmail);
 
         assertNotNull(response);
         assertEquals("USD", response.getFromCurrency());
@@ -78,20 +79,38 @@ class QuoteServiceTest {
     }
 
     @Test
-    void shouldThrowExceptionForUnsupportedCurrency() {
-
-        UUID userId = UUID.randomUUID();
-
+    void shouldThrowExceptionWhenCurrenciesAreTheSame() {
+        // ✅ FIXED: Testing your active service check: "Source and destination currencies cannot be the same"
         CreateQuoteRequest request = new CreateQuoteRequest(
-                userId,
                 BigDecimal.valueOf(100),
-                "ABC",
-                "NGN"
+                "USD",
+                "USD"
         );
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> quoteService.generateQuote(request)
+                () -> quoteService.generateQuote(request, mockEmail)
+        );
+
+        assertEquals(
+                "Source and destination currencies cannot be the same",
+                exception.getMessage()
+        );
+    }
+
+
+    @Test
+    void shouldThrowExceptionForUnsupportedCurrency() {
+        CreateQuoteRequest request = new CreateQuoteRequest(
+                BigDecimal.valueOf(100),
+                "ABC", // Invalid currency code
+                "NGN"
+        );
+
+        // Mocking behavior assuming your service checks currency support before database lookups
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> quoteService.generateQuote(request, mockEmail)
         );
 
         assertEquals(
