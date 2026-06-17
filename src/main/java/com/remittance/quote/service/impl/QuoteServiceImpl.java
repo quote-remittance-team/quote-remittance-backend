@@ -53,7 +53,7 @@ public class QuoteServiceImpl implements QuoteService {
         }
 
         User user = userRepository.findByEmailIgnoreCase(userEmail)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         BigDecimal exchangeRate =
                 exchangeRateClient.getExchangeRate(
