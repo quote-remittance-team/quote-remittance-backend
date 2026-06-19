@@ -13,6 +13,8 @@ import com.remittance.remittance.repository.RemittanceRepository;
 import com.remittance.remittance.service.RemittanceService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RemittanceServiceImpl implements RemittanceService {
@@ -28,6 +31,9 @@ public class RemittanceServiceImpl implements RemittanceService {
     private final DepositRepository depositRepository;
     private final RemittanceRepository remittanceRepository;
     private final ApplicationEventPublisher eventPublisher;
+
+    @Value("${paystack.api.secret}")
+    private String paystackSecretKey;
 
     @Override
     @Transactional
@@ -156,5 +162,99 @@ public class RemittanceServiceImpl implements RemittanceService {
                 .receiveAmount(remittance.getReceiveAmount())
                 .createdAt(remittance.getCreatedAt())
                 .build();
+    }
+
+    @Override
+    public RemittanceResponse verifyAndCompletePayment(String reference, String userEmail) {
+        log.info("Executing relational processing logic verification for reference: {}", reference);
+
+        // Check if it already exists before doing anything else
+        Optional<Remittance> existingRemittance = remittanceRepository.findByReference(reference);
+        if (existingRemittance.isPresent()) {
+
+            if (!existingRemittance.get().getSender().getEmail().equals(userEmail)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized access to transaction metadata.");
+            }
+            log.info("Duplicate request intercepted safely via reference tracking keys. Returning existing entity.");
+            return mapToResponse(existingRemittance.get());
+        }
+
+        // 2. Query Paystack Secure Gateway to Audit the Payment State
+        String paystackVerificationUrl = "https://api.paystack.co/transaction/verify/" + reference;
+        org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        // FIXED: Added missing space after "Bearer "
+        headers.set("Authorization", "Bearer " + this.paystackSecretKey);
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+        org.springframework.http.HttpEntity<String> requestEntity = new org.springframework.http.HttpEntity<>(headers);
+
+        try {
+            log.info("Sending Authorization Header: Bearer {}", this.paystackSecretKey != null ? "PRESENT (Length: " + this.paystackSecretKey.length() + ")" : "NULL");
+            log.info("Target Paystack Verification URL: {}", paystackVerificationUrl);
+
+// Dispatching outbound validation call...
+            log.info("Dispatching outbound validation call to Paystack API...");
+            org.springframework.http.ResponseEntity<com.remittance.remittance.dto.PaystackVerifyResponse> apiResponse =
+                    restTemplate.exchange(
+                            paystackVerificationUrl,
+                            org.springframework.http.HttpMethod.GET,
+                            requestEntity,
+                            com.remittance.remittance.dto.PaystackVerifyResponse.class
+                    );
+
+            com.remittance.remittance.dto.PaystackVerifyResponse payload = apiResponse.getBody();
+
+            if (payload == null || !payload.isStatus() || !"success".equals(payload.getData().getStatus())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment confirmation rejected by gateway authority.");
+            }
+
+            // 3. Save the data inside a dedicated transaction block
+            return saveVerifiedTransaction(reference, userEmail);
+
+        } catch (org.springframework.web.client.RestClientException exception) {
+            log.error("Network infrastructure dropout during gateway verification exchange: ", exception);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Outbound financial validation communication error.");
+        }
+    }
+
+    @Transactional
+    public RemittanceResponse saveVerifiedTransaction(String reference, String userEmail) {
+        // Locate corresponding PENDING row
+        Deposit deposit = depositRepository.findByPaymentReference(reference)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No matching deposit asset index matches reference: " + reference));
+
+        // Anti-IDOR Check
+        if (!deposit.getQuote().getUser().getEmail().equals(userEmail)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access authorization check failed for this entity.");
+        }
+
+        // Update Funding Source state
+        deposit.setStatus(DepositStatus.CONFIRMED);
+        depositRepository.save(deposit);
+
+        // Compile Remittance record
+        Quote quote = deposit.getQuote();
+        Remittance remittance = Remittance.builder()
+                .reference(reference)
+                .deposit(deposit)
+                .quote(quote)
+                .sender(quote.getUser())
+                .receiverName(deposit.getReceiverName())
+                .receiverAccountNumber(deposit.getReceiverAccountNumber())
+                .receiverBankCode(deposit.getReceiverBankCode())
+                .sendAmount(quote.getSendAmount())
+                .receiveAmount(quote.getReceiveAmount())
+                .exchangeRate(quote.getExchangeRate())
+                .status(RemittanceStatus.PROCESSING)
+                .idempotencyKey("IDEM-" + reference)
+                .build();
+
+        Remittance savedRemittance = remittanceRepository.save(remittance);
+
+        // Broadcast downstream events
+        eventPublisher.publishEvent(new RemittanceCreatedEvent(savedRemittance));
+
+        return mapToResponse(savedRemittance);
     }
 }

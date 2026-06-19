@@ -17,4 +17,14 @@ public interface RemittanceService {
             String reference,
             String userEmail
     );
+
+    RemittanceResponse verifyAndCompletePayment (
+            String reference,
+            String userEmail
+    );
+
+    RemittanceResponse saveVerifiedTransaction (
+            String reference,
+            String userEmail
+    );
 }

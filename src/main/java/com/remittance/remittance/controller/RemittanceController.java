@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
 
@@ -57,4 +58,23 @@ public class RemittanceController {
                 remittanceService.getByReference(reference, "test@example.com")
         );
     }
+
+    @GetMapping("/verify/{reference}")
+    public ResponseEntity<RemittanceResponse> verifyAndCompletePayment(
+            @PathVariable String reference,
+            Principal principal
+    ) {
+        if (principal == null) {
+            log.warn("Access denied: Principal context is missing for reference verification.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You must be logged in to verify this payment.");
+        }
+
+        log.info("Initiating verification protocol for gateway reference: {}", reference);
+        String userEmail = principal.getName();
+        log.info("Authenticated user context found: {}", userEmail);
+
+        RemittanceResponse response = remittanceService.verifyAndCompletePayment(reference, userEmail);
+        return ResponseEntity.ok(response);
+    }
+
 }

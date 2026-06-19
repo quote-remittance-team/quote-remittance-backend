@@ -36,4 +36,13 @@ public class Deposit extends BaseEntity {
 
     @Column(name = "idempotency_key",unique = true, nullable = false)
     private String idempotencyKey;
+
+    @Column(name = "receiver_name")
+    private String receiverName;
+
+    @Column(name = "receiver_account_number")
+    private String receiverAccountNumber;
+
+    @Column(name = "receiver_bank_code")
+    private String receiverBankCode;
 }
