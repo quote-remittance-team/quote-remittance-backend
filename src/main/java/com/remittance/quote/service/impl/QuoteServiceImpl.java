@@ -39,7 +39,7 @@ public class QuoteServiceImpl implements QuoteService {
 
     @Override
     @Transactional
-    public QuoteResponse generateQuote(CreateQuoteRequest request) {
+    public QuoteResponse generateQuote(CreateQuoteRequest request, String userEmail) {
 
         String fromCurrency = CurrencyValidator.normalize(request.getFromCurrency());
 
@@ -52,8 +52,8 @@ public class QuoteServiceImpl implements QuoteService {
             );
         }
 
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        User user = userRepository.findByEmailIgnoreCase(userEmail)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         BigDecimal exchangeRate =
                 exchangeRateClient.getExchangeRate(

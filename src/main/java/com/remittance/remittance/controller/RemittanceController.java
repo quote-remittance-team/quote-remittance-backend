@@ -5,7 +5,7 @@ import com.remittance.remittance.dto.RemittanceResponse;
 import com.remittance.remittance.service.RemittanceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +22,6 @@ import java.security.Principal;
 @RestController
 @RequestMapping("/remittances")
 @RequiredArgsConstructor
-@Slf4j
 public class RemittanceController {
 
     private final RemittanceService remittanceService;
@@ -55,7 +54,7 @@ public class RemittanceController {
         String email = principal.getName();
 
         return ResponseEntity.ok(
-                remittanceService.getByReference(reference, "test@example.com")
+                remittanceService.getByReference(reference, email)
         );
     }
 

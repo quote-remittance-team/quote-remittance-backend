@@ -8,6 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 
 import java.util.UUID;
 
@@ -20,10 +23,22 @@ public class QuoteController {
 
     @PostMapping
     public ResponseEntity<QuoteResponse> createQuote(
-            @Valid @RequestBody CreateQuoteRequest request
+            @Valid @RequestBody CreateQuoteRequest request, Authentication authentication
     ) {
 
-        QuoteResponse response = quoteService.generateQuote(request);
+        if (authentication == null ||
+                !authentication.isAuthenticated() ||
+                authentication instanceof org.springframework.security.authentication.AnonymousAuthenticationToken) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "User is not authenticated"
+            );
+        }
+
+        String email = authentication.getName();
+
+        QuoteResponse response = quoteService.generateQuote(request, email);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -33,13 +48,21 @@ public class QuoteController {
     @GetMapping("/{id}")
     public ResponseEntity<QuoteResponse> getQuoteById(
             @PathVariable UUID id,
-            org.springframework.security.core.Authentication authentication
+            Authentication authentication
     ) {
 
-        // 🔥 FIX: prevent null crash in tests
-        String email = (authentication != null)
-                ? authentication.getName()
-                : "test@example.com";
+
+        if (authentication == null ||
+                !authentication.isAuthenticated() ||
+                authentication instanceof org.springframework.security.authentication.AnonymousAuthenticationToken) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "User is not authenticated"
+            );
+        }
+
+        String email = authentication.getName();
 
         QuoteResponse response =
                 quoteService.getQuoteById(id, email);

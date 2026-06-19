@@ -9,6 +9,6 @@ import java.util.UUID;
 
 public interface QuoteService {
 
-    QuoteResponse generateQuote(CreateQuoteRequest request);
+    QuoteResponse generateQuote(CreateQuoteRequest request, String userEmail);
     QuoteResponse getQuoteById(UUID id, String userEmail);
 }
