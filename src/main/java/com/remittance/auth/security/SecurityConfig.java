@@ -40,10 +40,11 @@ public class SecurityConfig {
                                 "/users/register",
                                 "/quotes/**",
                                 "/webhooks/**",
-                                "/remittances/verify**",
                                 "/actuator/health",
                                 "/api/v1/webhooks/paystack",
-                                "/actuator/info"
+                                "/actuator/info",
+                                "/error"
+
 
                         ).permitAll()
                         .requestMatchers("/remittances/**").authenticated()
