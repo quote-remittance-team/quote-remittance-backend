@@ -42,8 +42,7 @@ public class SecurityConfig {
                                 "/webhooks/**",
                                 "/actuator/health",
                                 "/api/v1/webhooks/paystack",
-                                "/actuator/info",
-                                "/error"
+                                "/actuator/info"
 
 
                         ).permitAll()
