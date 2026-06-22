@@ -6,6 +6,7 @@ import com.remittance.integration.payout.dto.TransferRequest;
 import com.remittance.integration.payout.dto.TransferResponse;
 import com.remittance.payout.entity.Payout;
 import com.remittance.payout.repository.PayoutRepository;
+import com.remittance.remittance.entity.Remittance;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +21,18 @@ public class PayoutService {
 
     @Value("${paystack.transfer.source:balance}")
     private String transferSource;
+
+    @Transactional
+    public Payout createPayout(Remittance remittance) {
+
+        Payout payout = Payout.builder()
+                .remittance(remittance)
+                .status(PayoutStatus.PENDING)
+                .build();
+
+        return payoutRepository.save(payout);
+    }
+
 
     public PayoutService(PayoutRepository payoutRepository, PayoutClient payoutClient) {
         this.payoutRepository = payoutRepository;
@@ -39,7 +52,8 @@ public class PayoutService {
                 recipientCode,
                 "Payout for Remittance: " + remittanceId.toString()
         );
-        try {
+
+        try{
             TransferResponse response = payoutClient.initiateTransfer(request);
             if (response.status()) {
                 payout.setProviderReference(response.data().transferCode());

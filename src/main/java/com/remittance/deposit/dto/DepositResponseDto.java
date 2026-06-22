@@ -16,4 +16,8 @@ public class DepositResponseDto {
     private String currency;
     private String checkoutUrl;
     private String paymentReference;
+
+    private String receiverName;
+    private String receiverAccountNumber;
+    private String receiverBankCode;
 }

@@ -40,7 +40,9 @@ public class DepositController {
     // POST /deposits/webhook
     @PostMapping("/webhook")
     public ResponseEntity<Deposit> handleWebhook(@Valid @RequestBody DepositWebhookDto webhookPayload, @RequestHeader(value = "X-Provider-Signature", required = false) String providedSignature) {
+        log.info("WEBHOOK RECEIVED: {}", webhookPayload);
         log.info("Received webhook for payment reference: {} with status: {}", webhookPayload.getPaymentReference(), webhookPayload.getStatus());
+        log.info("Received signature: {}", providedSignature);
         if (providedSignature == null || !java.security.MessageDigest.isEqual(providedSignature.getBytes(java.nio.charset.StandardCharsets.UTF_8),expectedWebhookSecret.getBytes(java.nio.charset.StandardCharsets.UTF_8))) {
             log.warn("SECURITY ALERT: Unauthorized webhook spoofing attempt blocked!");
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid webhook spoofing attempt blocked!");
@@ -49,5 +51,7 @@ public class DepositController {
         Deposit updateDeposit = depositService.handlePaymentCallback(webhookPayload.getPaymentReference(), webhookPayload.getStatus());
         return ResponseEntity.ok(updateDeposit);
     }
+
+
 
 }

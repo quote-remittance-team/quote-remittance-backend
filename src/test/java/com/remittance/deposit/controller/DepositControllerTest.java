@@ -84,6 +84,9 @@ class DepositControllerTest {
                 .status(DepositStatus.PENDING)
                 .paymentReference("REF123")
                 .idempotencyKey("idem-key-123")
+                .receiverName("Jane Doe")
+                .receiverAccountNumber("0987654321")
+                .receiverBankCode("044")
                 .build();
 
         org.springframework.test.util.ReflectionTestUtils.setField(
@@ -108,6 +111,10 @@ class DepositControllerTest {
         DepositRequestDto requestDto = new DepositRequestDto();
         requestDto.setQuoteId(UUID.randomUUID());
         requestDto.setIdempotencyKey(UUID.randomUUID().toString());
+
+        requestDto.setReceiverName("Jane Doe");
+        requestDto.setReceiverAccountNumber("0987654321");
+        requestDto.setReceiverBankCode("044");
 
         when(depositService.initiateDeposit(
                 any(DepositRequestDto.class),

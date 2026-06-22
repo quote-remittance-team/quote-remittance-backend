@@ -15,5 +15,3 @@ public class DepositWebhookDto {
     @JsonProperty("Status")
     private DepositStatus status;
 }
-
-
