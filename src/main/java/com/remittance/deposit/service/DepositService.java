@@ -153,9 +153,5 @@ public class DepositService {
         };
     }
 
-    public Deposit getByPaymentReference(String paymentReference) {
-        return depositRepository.findByPaymentReference(paymentReference)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Deposit not found: " + paymentReference));
-    }
+
 }

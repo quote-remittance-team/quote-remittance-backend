@@ -24,7 +24,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -68,6 +70,7 @@ class RemittanceServiceTest {
         User user = User.builder()
                 .email(EMAIL)
                 .build();
+
 
         Quote quote = Quote.builder()
                 .quoteReference("QTE-123456")
@@ -232,9 +235,9 @@ class RemittanceServiceTest {
         when(depositRepository.findById(depositId))
                 .thenReturn(Optional.of(deposit));
 
-        IllegalStateException exception =
+        ResponseStatusException exception =
                 assertThrows(
-                        IllegalStateException.class,
+                        ResponseStatusException.class,
                         () -> remittanceService.createRemittance(
                                 request,
                                 EMAIL
@@ -243,7 +246,12 @@ class RemittanceServiceTest {
 
         assertEquals(
                 "Deposit must be confirmed before remittance",
-                exception.getMessage()
+                exception.getReason()
+        );
+
+        assertEquals(
+                HttpStatus.CONFLICT,
+                exception.getStatusCode()
         );
 
         verify(remittanceRepository, never())
@@ -295,9 +303,9 @@ class RemittanceServiceTest {
         when(remittanceRepository.findByDepositId(depositId))
                 .thenReturn(Optional.of(existingRemittance));
 
-        IllegalStateException exception =
+        ResponseStatusException exception =
                 assertThrows(
-                        IllegalStateException.class,
+                        ResponseStatusException.class,
                         () -> remittanceService.createRemittance(
                                 request,
                                 EMAIL
@@ -306,7 +314,12 @@ class RemittanceServiceTest {
 
         assertEquals(
                 "Remittance already exists for deposit",
-                exception.getMessage()
+                exception.getReason()
+        );
+
+        assertEquals(
+                HttpStatus.CONFLICT,
+                exception.getStatusCode()
         );
 
         verify(remittanceRepository, never())

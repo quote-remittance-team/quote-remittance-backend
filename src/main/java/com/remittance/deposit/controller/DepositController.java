@@ -53,13 +53,5 @@ public class DepositController {
     }
 
 
-    @GetMapping("/{paymentReference}")
-    public ResponseEntity<Deposit> getDepositByReference(
-            @PathVariable String paymentReference
-    ) {
-        return ResponseEntity.ok(
-                depositService.getByPaymentReference(paymentReference)
-        );
-    }
 
 }

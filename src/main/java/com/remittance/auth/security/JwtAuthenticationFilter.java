@@ -49,7 +49,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             userEmail = jwtService.extractEmail(jwt);
         } catch (io.jsonwebtoken.JwtException e) {
-            log.error("Invalid JWT token", e);
+            log.warn("Invalid JWT token", e);
             filterChain.doFilter(request, response);
             return;
         }
